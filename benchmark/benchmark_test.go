@@ -8,10 +8,10 @@ import (
 	"math/rand"
 	"net"
 
+	_ "github.com/SHARANTANGEDA/mp-quic/integrationtests/tools/testlog"
+	"github.com/SHARANTANGEDA/mp-quic/internal/protocol"
+	"github.com/SHARANTANGEDA/mp-quic/internal/testdata"
 	quic "github.com/lucas-clemente/quic-go"
-	_ "github.com/lucas-clemente/quic-go/integrationtests/tools/testlog"
-	"github.com/lucas-clemente/quic-go/internal/protocol"
-	"github.com/lucas-clemente/quic-go/internal/testdata"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

@@ -3,10 +3,10 @@ package quic
 import (
 	"bytes"
 
-	"github.com/lucas-clemente/quic-go/internal/crypto"
-	"github.com/lucas-clemente/quic-go/internal/protocol"
-	"github.com/lucas-clemente/quic-go/internal/wire"
-	"github.com/lucas-clemente/quic-go/qerr"
+	"github.com/SHARANTANGEDA/mp-quic/internal/crypto"
+	"github.com/SHARANTANGEDA/mp-quic/internal/protocol"
+	"github.com/SHARANTANGEDA/mp-quic/internal/wire"
+	"github.com/SHARANTANGEDA/mp-quic/qerr"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

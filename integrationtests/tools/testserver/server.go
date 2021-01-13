@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/SHARANTANGEDA/mp-quic/h2quic"
+	"github.com/SHARANTANGEDA/mp-quic/internal/protocol"
+	"github.com/SHARANTANGEDA/mp-quic/internal/testdata"
 	quic "github.com/lucas-clemente/quic-go"
-	"github.com/lucas-clemente/quic-go/h2quic"
-	"github.com/lucas-clemente/quic-go/internal/protocol"
-	"github.com/lucas-clemente/quic-go/internal/testdata"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

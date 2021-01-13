@@ -3,8 +3,8 @@ package ackhandler
 import (
 	"time"
 
-	"github.com/lucas-clemente/quic-go/internal/protocol"
-	"github.com/lucas-clemente/quic-go/internal/wire"
+	"github.com/SHARANTANGEDA/mp-quic/internal/protocol"
+	"github.com/SHARANTANGEDA/mp-quic/internal/wire"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

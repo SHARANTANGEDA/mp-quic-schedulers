@@ -6,9 +6,9 @@ import (
 	"io"
 	"sync"
 
+	"github.com/SHARANTANGEDA/mp-quic/internal/crypto"
+	"github.com/SHARANTANGEDA/mp-quic/internal/protocol"
 	"github.com/bifurcation/mint"
-	"github.com/lucas-clemente/quic-go/internal/crypto"
-	"github.com/lucas-clemente/quic-go/internal/protocol"
 )
 
 // KeyDerivationFunction is used for key derivation

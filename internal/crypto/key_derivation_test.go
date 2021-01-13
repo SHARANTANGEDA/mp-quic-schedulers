@@ -4,8 +4,8 @@ import (
 	"crypto"
 	"errors"
 
+	"github.com/SHARANTANGEDA/mp-quic/internal/protocol"
 	"github.com/bifurcation/mint"
-	"github.com/lucas-clemente/quic-go/internal/protocol"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

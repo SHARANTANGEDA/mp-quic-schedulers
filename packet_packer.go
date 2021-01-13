@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/lucas-clemente/quic-go/ackhandler"
-	"github.com/lucas-clemente/quic-go/internal/handshake"
-	"github.com/lucas-clemente/quic-go/internal/protocol"
-	"github.com/lucas-clemente/quic-go/internal/wire"
+	"github.com/SHARANTANGEDA/mp-quic/ackhandler"
+	"github.com/SHARANTANGEDA/mp-quic/internal/handshake"
+	"github.com/SHARANTANGEDA/mp-quic/internal/protocol"
+	"github.com/SHARANTANGEDA/mp-quic/internal/wire"
 )
 
 type packedPacket struct {
@@ -24,8 +24,8 @@ type packetPacker struct {
 	version      protocol.VersionNumber
 	cryptoSetup  handshake.CryptoSetup
 
-	connectionParameters  handshake.ConnectionParametersManager
-	streamFramer          *streamFramer
+	connectionParameters handshake.ConnectionParametersManager
+	streamFramer         *streamFramer
 
 	controlFrames []wire.Frame
 	stopWaiting   map[protocol.PathID]*wire.StopWaitingFrame
@@ -40,14 +40,14 @@ func newPacketPacker(connectionID protocol.ConnectionID,
 	version protocol.VersionNumber,
 ) *packetPacker {
 	return &packetPacker{
-		cryptoSetup:           cryptoSetup,
-		connectionID:          connectionID,
-		connectionParameters:  connectionParameters,
-		perspective:           perspective,
-		version:               version,
-		streamFramer:          streamFramer,
-		stopWaiting:           make(map[protocol.PathID]*wire.StopWaitingFrame),
-		ackFrame:              make(map[protocol.PathID]*wire.AckFrame),
+		cryptoSetup:          cryptoSetup,
+		connectionID:         connectionID,
+		connectionParameters: connectionParameters,
+		perspective:          perspective,
+		version:              version,
+		streamFramer:         streamFramer,
+		stopWaiting:          make(map[protocol.PathID]*wire.StopWaitingFrame),
+		ackFrame:             make(map[protocol.PathID]*wire.AckFrame),
 	}
 }
 
@@ -355,4 +355,3 @@ func (p *packetPacker) canSendData(encLevel protocol.EncryptionLevel) bool {
 	}
 	return encLevel == protocol.EncryptionForwardSecure
 }
-
