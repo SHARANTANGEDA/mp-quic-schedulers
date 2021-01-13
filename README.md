@@ -1,24 +1,17 @@
-# A QUIC implementation in pure Go
+# A Standalone MPQUIC implementation in pure Go
 
-**Please read https://multipath-quic.org/2017/12/09/artifacts-available.html to figure out how to setup the code.**
+**Inspired from: https://multipath-quic.org/2017/12/09/artifacts-available.html**
 
-<img src="docs/quic.png" width=303 height=124>
-
-[![Godoc Reference](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](https://godoc.org/github.com/lucas-clemente/quic-go)
-[![Linux Build Status](https://img.shields.io/travis/lucas-clemente/quic-go/master.svg?style=flat-square&label=linux+build)](https://travis-ci.org/lucas-clemente/quic-go)
-[![Windows Build Status](https://img.shields.io/appveyor/ci/lucas-clemente/quic-go/master.svg?style=flat-square&label=windows+build)](https://ci.appveyor.com/project/lucas-clemente/quic-go/branch/master)
-[![Code Coverage](https://img.shields.io/codecov/c/github/lucas-clemente/quic-go/master.svg?style=flat-square)](https://codecov.io/gh/lucas-clemente/quic-go/)
-
-quic-go is an implementation of the [QUIC](https://en.wikipedia.org/wiki/QUIC) protocol in Go.
+mp-quic is a multipath implementation of the [QUIC](https://en.wikipedia.org/wiki/QUIC) protocol in Go.
 
 ## Roadmap
+- Implement different Machine Learning based Schedulers
+- Make this completely standalone, so that anyone can import this library without manual
 
-quic-go is compatible with the current version(s) of Google Chrome and QUIC as deployed on Google's servers. We're actively tracking the development of the Chrome code to ensure compatibility as the protocol evolves. In that process, we're dropping support for old QUIC versions.
-As Google's QUIC versions are expected to converge towards the [IETF QUIC draft](https://github.com/quicwg/base-drafts), quic-go will eventually implement that draft.
-
+This version of mp-quic is not dependent on quic-go, and can be installed as a standalone package
 ## Guides
 
-We currently support Go 1.9+.
+We currently support Go 1.14+.
 
 Installing and updating dependencies:
 
@@ -71,4 +64,8 @@ http.Client{
 
 ## Contributing
 
-We are always happy to welcome new contributors! We have a number of self-contained issues that are suitable for first-time contributors, they are tagged with [want-help](https://github.com/lucas-clemente/quic-go/issues?q=is%3Aopen+is%3Aissue+label%3Awant-help). If you have any questions, please feel free to reach out by opening an issue or leaving a comment.
+We are always happy to welcome new contributors! We have a number of self-contained issues that are suitable for first-time contributors, they are tagged with [want-help](https://github.com/SHARANTANGEDA/mp-quic/issues?q=is%3Aopen+is%3Aissue+label%3Awant-help). If you have any questions, please feel free to reach out by opening an issue or leaving a comment.
+
+## Acknowledgment
+- Thanks to [Qdeconinck](https://github.com/qdeconinck/mp-quic) for implementing this mp-quic
+- While we have added different schedulers and made it standalone

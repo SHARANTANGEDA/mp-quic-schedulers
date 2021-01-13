@@ -6,9 +6,9 @@ package mocks
 import (
 	time "time"
 
+	"github.com/SHARANTANGEDA/mp-quic/internal/handshake"
+	protocol "github.com/SHARANTANGEDA/mp-quic/internal/protocol"
 	gomock "github.com/golang/mock/gomock"
-	"github.com/lucas-clemente/quic-go/internal/handshake"
-	protocol "github.com/lucas-clemente/quic-go/internal/protocol"
 )
 
 // MockConnectionParametersManager is a mock of ConnectionParametersManager interface

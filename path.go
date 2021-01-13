@@ -3,12 +3,12 @@ package quic
 import (
 	"time"
 
-	"github.com/lucas-clemente/quic-go/ackhandler"
-	"github.com/lucas-clemente/quic-go/congestion"
-	"github.com/lucas-clemente/quic-go/qerr"
-	"github.com/lucas-clemente/quic-go/internal/protocol"
-	"github.com/lucas-clemente/quic-go/internal/utils"
-	"github.com/lucas-clemente/quic-go/internal/wire"
+	"github.com/SHARANTANGEDA/mp-quic/ackhandler"
+	"github.com/SHARANTANGEDA/mp-quic/congestion"
+	"github.com/SHARANTANGEDA/mp-quic/internal/protocol"
+	"github.com/SHARANTANGEDA/mp-quic/internal/utils"
+	"github.com/SHARANTANGEDA/mp-quic/internal/wire"
+	"github.com/SHARANTANGEDA/mp-quic/qerr"
 )
 
 const (
@@ -33,7 +33,7 @@ type path struct {
 
 	potentiallyFailed utils.AtomicBool
 
-	sentPacket          chan struct{}
+	sentPacket chan struct{}
 
 	// It is now the responsibility of the path to keep its packet number
 	packetNumberGenerator *packetNumberGenerator
@@ -47,7 +47,7 @@ type path struct {
 
 	lastNetworkActivityTime time.Time
 
-	timer           *utils.Timer
+	timer *utils.Timer
 }
 
 // setup initializes values that are independent of the perspective

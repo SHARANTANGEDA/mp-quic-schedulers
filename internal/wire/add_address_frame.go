@@ -5,8 +5,8 @@ import (
 	"errors"
 	"net"
 
-	"github.com/lucas-clemente/quic-go/internal/protocol"
-	"github.com/lucas-clemente/quic-go/internal/utils"
+	"github.com/SHARANTANGEDA/mp-quic/internal/protocol"
+	"github.com/SHARANTANGEDA/mp-quic/internal/utils"
 )
 
 var (
@@ -60,7 +60,7 @@ func ParseAddAddressFrame(r *bytes.Reader, version protocol.VersionNumber) (*Add
 	// read the TypeByte
 	_, err := r.ReadByte()
 	if err != nil {
-		 return nil, err
+		return nil, err
 	}
 
 	ipv, err := r.ReadByte()
@@ -113,7 +113,7 @@ func ParseAddAddressFrame(r *bytes.Reader, version protocol.VersionNumber) (*Add
 	return frame, nil
 }
 
-func (f* AddAddressFrame) MinLength(version protocol.VersionNumber) (protocol.ByteCount, error) {
+func (f *AddAddressFrame) MinLength(version protocol.VersionNumber) (protocol.ByteCount, error) {
 	switch f.IPVersion {
 	case 4:
 		return 1 + 1 + 4 + 2, nil

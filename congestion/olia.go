@@ -1,8 +1,8 @@
 package congestion
 
 import (
-	"github.com/lucas-clemente/quic-go/internal/protocol"
-	"github.com/lucas-clemente/quic-go/internal/utils"
+	"github.com/SHARANTANGEDA/mp-quic/internal/protocol"
+	"github.com/SHARANTANGEDA/mp-quic/internal/utils"
 )
 
 const scale uint = 10
@@ -14,7 +14,7 @@ type Olia struct {
 	// Total number of bytes acked at the last loss
 	loss2 protocol.ByteCount
 	// Current number of bytes acked
-	loss3 protocol.ByteCount
+	loss3      protocol.ByteCount
 	epsilonNum int
 	epsilonDen uint32
 	sndCwndCnt int
@@ -47,7 +47,7 @@ func (o *Olia) Reset() {
 }
 
 func (o *Olia) SmoothedBytesBetweenLosses() protocol.ByteCount {
-	return utils.MaxByteCount(o.loss3 - o.loss2, o.loss2 - o.loss1)
+	return utils.MaxByteCount(o.loss3-o.loss2, o.loss2-o.loss1)
 }
 
 func (o *Olia) UpdateAckedSinceLastLoss(ackedBytes protocol.ByteCount) {
@@ -69,23 +69,23 @@ func (o *Olia) CongestionWindowAfterAck(currentCongestionWindow protocol.PacketN
 
 	// calculate the increasing term, scaling is used to reduce the rounding effect
 	if o.epsilonNum == -1 {
-		if uint64(o.epsilonDen) * cwndScaled * cwndScaled < uint64(rate) {
-			incNum := uint64(rate) - uint64(o.epsilonDen) * cwndScaled * cwndScaled
+		if uint64(o.epsilonDen)*cwndScaled*cwndScaled < uint64(rate) {
+			incNum := uint64(rate) - uint64(o.epsilonDen)*cwndScaled*cwndScaled
 			o.sndCwndCnt -= int(oliaScale(incNum, scale) / uint64(incDen))
 		} else {
-			incNum := uint64(o.epsilonDen) * cwndScaled * cwndScaled - uint64(rate)
+			incNum := uint64(o.epsilonDen)*cwndScaled*cwndScaled - uint64(rate)
 			o.sndCwndCnt += int(oliaScale(incNum, scale) / uint64(incDen))
 		}
 	} else {
-		incNum := uint64(o.epsilonNum) * uint64(rate) + uint64(o.epsilonDen) * cwndScaled * cwndScaled
+		incNum := uint64(o.epsilonNum)*uint64(rate) + uint64(o.epsilonDen)*cwndScaled*cwndScaled
 		o.sndCwndCnt += int(oliaScale(incNum, scale) / uint64(incDen))
 	}
 
-	if o.sndCwndCnt >= (1 << scale) - 1 {
+	if o.sndCwndCnt >= (1<<scale)-1 {
 		newCongestionWindow++
 		o.sndCwndCnt = 0
-	} else if o.sndCwndCnt <= 0 - (1 << scale) + 1 {
-		newCongestionWindow = utils.MaxPacketNumber(1, currentCongestionWindow - 1)
+	} else if o.sndCwndCnt <= 0-(1<<scale)+1 {
+		newCongestionWindow = utils.MaxPacketNumber(1, currentCongestionWindow-1)
 		o.sndCwndCnt = 0
 	}
 	return newCongestionWindow

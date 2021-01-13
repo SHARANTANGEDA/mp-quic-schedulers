@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/lucas-clemente/quic-go/internal/utils"
+	"github.com/SHARANTANGEDA/mp-quic/internal/utils"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

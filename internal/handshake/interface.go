@@ -1,6 +1,6 @@
 package handshake
 
-import "github.com/lucas-clemente/quic-go/internal/protocol"
+import "github.com/SHARANTANGEDA/mp-quic/internal/protocol"
 
 // Sealer seals a packet
 type Sealer interface {
@@ -24,5 +24,5 @@ type CryptoSetup interface {
 // TransportParameters are parameters sent to the peer during the handshake
 type TransportParameters struct {
 	RequestConnectionIDTruncation bool
-	CacheHandshake bool
+	CacheHandshake                bool
 }

@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/lucas-clemente/quic-go/internal/protocol"
-	"github.com/lucas-clemente/quic-go/internal/utils"
+	"github.com/SHARANTANGEDA/mp-quic/internal/protocol"
+	"github.com/SHARANTANGEDA/mp-quic/internal/utils"
 )
 
 var (
@@ -59,7 +59,7 @@ func ParseAckFrame(r *bytes.Reader, version protocol.VersionNumber) (*AckFrame, 
 	}
 
 	// U bit used to indicate that the ACK contains PathID
-	if typeByte & 0x10 == 0x10 {
+	if typeByte&0x10 == 0x10 {
 		pathID, err := r.ReadByte()
 		if err != nil {
 			return nil, err
