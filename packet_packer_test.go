@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"math"
 
-	"github.com/lucas-clemente/quic-go/ackhandler"
-	"github.com/lucas-clemente/quic-go/congestion"
-	"github.com/lucas-clemente/quic-go/internal/handshake"
-	"github.com/lucas-clemente/quic-go/internal/mocks"
-	"github.com/lucas-clemente/quic-go/internal/protocol"
-	"github.com/lucas-clemente/quic-go/internal/wire"
+	"github.com/SHARANTANGEDA/mp-quic/ackhandler"
+	"github.com/SHARANTANGEDA/mp-quic/congestion"
+	"github.com/SHARANTANGEDA/mp-quic/internal/handshake"
+	"github.com/SHARANTANGEDA/mp-quic/internal/mocks"
+	"github.com/SHARANTANGEDA/mp-quic/internal/protocol"
+	"github.com/SHARANTANGEDA/mp-quic/internal/wire"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

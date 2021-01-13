@@ -3,9 +3,9 @@ package quic
 import (
 	"bytes"
 
-	"github.com/lucas-clemente/quic-go/internal/mocks/mocks_fc"
-	"github.com/lucas-clemente/quic-go/internal/protocol"
-	"github.com/lucas-clemente/quic-go/internal/wire"
+	"github.com/SHARANTANGEDA/mp-quic/internal/mocks/mocks_fc"
+	"github.com/SHARANTANGEDA/mp-quic/internal/protocol"
+	"github.com/SHARANTANGEDA/mp-quic/internal/wire"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -230,8 +230,8 @@ var _ = Describe("Stream Framer", func() {
 				minFrameDataLen := protocol.MaxPacketSize
 
 				for i := 0; i < 30; i++ {
-					if i - int(frameHeaderLen) > 0 {
-						mockFcm.EXPECT().AddBytesRetrans(origFrame.StreamID, protocol.ByteCount(i) - frameHeaderLen)
+					if i-int(frameHeaderLen) > 0 {
+						mockFcm.EXPECT().AddBytesRetrans(origFrame.StreamID, protocol.ByteCount(i)-frameHeaderLen)
 					}
 					frames, currentLen := framer.maybePopFramesForRetransmission(protocol.ByteCount(i))
 					if len(frames) == 0 {

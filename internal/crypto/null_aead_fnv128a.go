@@ -4,8 +4,8 @@ import (
 	"encoding/binary"
 	"errors"
 
+	"github.com/SHARANTANGEDA/mp-quic/internal/protocol"
 	"github.com/lucas-clemente/fnv128a"
-	"github.com/lucas-clemente/quic-go/internal/protocol"
 )
 
 // nullAEAD handles not-yet encrypted packets

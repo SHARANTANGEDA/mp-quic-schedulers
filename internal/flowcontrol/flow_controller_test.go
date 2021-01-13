@@ -3,9 +3,9 @@ package flowcontrol
 import (
 	"time"
 
-	"github.com/lucas-clemente/quic-go/congestion"
-	"github.com/lucas-clemente/quic-go/internal/mocks"
-	"github.com/lucas-clemente/quic-go/internal/protocol"
+	"github.com/SHARANTANGEDA/mp-quic/congestion"
+	"github.com/SHARANTANGEDA/mp-quic/internal/mocks"
+	"github.com/SHARANTANGEDA/mp-quic/internal/protocol"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

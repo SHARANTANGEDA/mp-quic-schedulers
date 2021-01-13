@@ -11,8 +11,8 @@ import (
 
 	quic "github.com/lucas-clemente/quic-go"
 
-	"github.com/lucas-clemente/quic-go/h2quic"
-	"github.com/lucas-clemente/quic-go/internal/utils"
+	"github.com/SHARANTANGEDA/mp-quic/h2quic"
+	"github.com/SHARANTANGEDA/mp-quic/internal/utils"
 )
 
 func main() {

@@ -1,8 +1,8 @@
 package crypto
 
 import (
+	"github.com/SHARANTANGEDA/mp-quic/internal/protocol"
 	"github.com/bifurcation/mint"
-	"github.com/lucas-clemente/quic-go/internal/protocol"
 )
 
 const (
