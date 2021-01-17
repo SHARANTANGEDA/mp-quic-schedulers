@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/SHARANTANGEDA/mp-quic/ackhandler"
+	"github.com/SHARANTANGEDA/mp-quic/constants"
 	"github.com/SHARANTANGEDA/mp-quic/internal/protocol"
 	"github.com/SHARANTANGEDA/mp-quic/internal/utils"
 	"github.com/SHARANTANGEDA/mp-quic/internal/wire"
@@ -206,10 +207,15 @@ pathLoop:
 
 // Lock of s.paths must be held
 func (sch *scheduler) selectPath(s *session, hasRetransmission bool, hasStreamRetransmission bool, fromPth *path) *path {
-	// XXX Currently round-robin
-	// TODO select the right scheduler dynamically
-	return sch.selectPathLowLatency(s, hasRetransmission, hasStreamRetransmission, fromPth)
-	// return sch.selectPathRoundRobin(s, hasRetransmission, hasStreamRetransmission, fromPth)
+
+	switch s.config.Scheduler {
+	case constants.SCHEDULER_ROUND_ROBIN:
+		return sch.selectPathRoundRobin(s, hasRetransmission, hasStreamRetransmission, fromPth)
+	case constants.SCHEDULER_LOW_LATENCY:
+		return sch.selectPathLowLatency(s, hasRetransmission, hasStreamRetransmission, fromPth)
+	default:
+		return sch.selectPathRoundRobin(s, hasRetransmission, hasStreamRetransmission, fromPth)
+	}
 }
 
 // Lock of s.paths must be free (in case of log print)
