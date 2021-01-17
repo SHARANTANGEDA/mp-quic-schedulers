@@ -189,6 +189,8 @@ func populateClientConfig(config *Config) *Config {
 		maxReceiveConnectionFlowControlWindow = protocol.DefaultMaxReceiveConnectionFlowControlWindowClient
 	}
 
+	PrintSchedulerInfo(config)
+
 	return &Config{
 		Versions:                              versions,
 		HandshakeTimeout:                      handshakeTimeout,
@@ -199,6 +201,7 @@ func populateClientConfig(config *Config) *Config {
 		KeepAlive:                             config.KeepAlive,
 		CacheHandshake:                        config.CacheHandshake,
 		CreatePaths:                           config.CreatePaths,
+		Scheduler:                             config.Scheduler,
 	}
 }
 

@@ -123,6 +123,8 @@ type Config struct {
 	CacheHandshake bool
 	// Should the host try to create new paths, if possible?
 	CreatePaths bool
+	// Select Scheduler to Choose default will be round-robin
+	Scheduler string
 }
 
 // A Listener for incoming QUIC connections
