@@ -1,17 +1,27 @@
 # A Standalone MPQUIC implementation in pure Go
 
-**Inspired from: https://multipath-quic.org/2017/12/09/artifacts-available.html**
+**Inspired and based on: https://multipath-quic.org/2017/12/09/artifacts-available.html**
 
-mp-quic is a multipath implementation of the [QUIC](https://en.wikipedia.org/wiki/QUIC) protocol in Go.
+mp-quic is a multipath implementation of the [quic-go](https://github.com/lucas-clemente/quic-go) protocol
 
 ## Roadmap
 - Implement different Machine Learning based Schedulers
-- Make this completely standalone, so that anyone can import this library without manual
+- _DONE_: Make this completely standalone, so that anyone can import this library without manual
 
 This version of mp-quic is not dependent on quic-go, and can be installed as a standalone package
 ## Guides
 
-We currently support Go 1.14+.
+We currently support Go **_1.12+_**
+
+Choosing Schedulers:
+
+    // Available Schedulers: round_robin, low_latency
+    // Default Scheduler: round_robin
+    // To choose a custom scheduler you can follow the below approach:
+    cfgServer := &quic.Config{
+		CreatePaths: true,
+		Scheduler: 'round_robin', // Or any of the above mentioned scheduler
+	}  // If nothing is mentioned round_robin will be default
 
 Installing and updating dependencies:
 
@@ -20,6 +30,19 @@ Installing and updating dependencies:
 Running tests:
 
     go test ./...
+
+## Example Implementation
+
+An application that does File Transfer using mp-quic has been shown at [MPQUIC-FTP](https://github.com/SHARANTANGEDA/mpquic_ftp)
+
+In case of any issue accessing it, please reach out to repository owner
+
+## Contributing
+
+We are always happy to welcome new contributors! We have a number of self-contained issues that are suitable for first-time contributors, they are tagged with [want-help](https://github.com/SHARANTANGEDA/mp-quic/issues?q=is%3Aopen+is%3Aissue+label%3Awant-help). If you have any questions, please feel free to reach out by opening an issue or leaving a comment.
+
+## Acknowledgment
+- Thanks to [Qdeconinck](https://github.com/qdeconinck/mp-quic) for starting this amazing work
 
 ### Running the example server
 
@@ -61,11 +84,3 @@ http.Client{
   Transport: &h2quic.RoundTripper{},
 }
 ```
-
-## Contributing
-
-We are always happy to welcome new contributors! We have a number of self-contained issues that are suitable for first-time contributors, they are tagged with [want-help](https://github.com/SHARANTANGEDA/mp-quic/issues?q=is%3Aopen+is%3Aissue+label%3Awant-help). If you have any questions, please feel free to reach out by opening an issue or leaving a comment.
-
-## Acknowledgment
-- Thanks to [Qdeconinck](https://github.com/qdeconinck/mp-quic) for implementing this mp-quic
-- While we have added different schedulers and made it standalone
