@@ -125,6 +125,12 @@ type Config struct {
 	CreatePaths bool
 	// Select Scheduler to Choose default will be round-robin
 	Scheduler string
+
+	WeightsFile       string
+	Training          bool
+	Epsilon           float64
+	AllowedCongestion int
+	DumpExperiences   bool
 }
 
 // A Listener for incoming QUIC connections

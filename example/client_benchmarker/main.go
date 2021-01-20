@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	quic "github.com/lucas-clemente/quic-go"
+	quic "github.com/SHARANTANGEDA/mp-quic"
 
 	"github.com/SHARANTANGEDA/mp-quic/h2quic"
 	"github.com/SHARANTANGEDA/mp-quic/internal/utils"
@@ -63,11 +63,13 @@ func main() {
 			body := &bytes.Buffer{}
 			_, err = io.Copy(body, rsp.Body)
 			if err != nil {
-				panic(err)
+				utils.Infof("%f", float64(30000))
+				wg.Done()
+			} else {
+				elapsed := time.Since(start)
+				utils.Infof("%f", float64(elapsed.Nanoseconds())/1000000)
+				wg.Done()
 			}
-			elapsed := time.Since(start)
-			utils.Infof("%s", elapsed)
-			wg.Done()
 		}(addr)
 	}
 	wg.Wait()

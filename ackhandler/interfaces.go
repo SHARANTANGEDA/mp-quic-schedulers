@@ -29,6 +29,13 @@ type SentPacketHandler interface {
 	DuplicatePacket(packet *Packet)
 
 	GetStatistics() (uint64, uint64, uint64)
+
+	// Additions for Peekaboo Implementation
+	GetLastPackets() uint64
+	GetAckedBytes() protocol.ByteCount
+	GetSentBytes() protocol.ByteCount
+	GetCongestionWindow() protocol.ByteCount
+	GetBytesInFlight() protocol.ByteCount
 }
 
 // ReceivedPacketHandler handles ACKs needed to send for incoming packets
