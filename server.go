@@ -208,6 +208,11 @@ func populateServerConfig(config *Config) *Config {
 		MaxReceiveStreamFlowControlWindow:     maxReceiveStreamFlowControlWindow,
 		MaxReceiveConnectionFlowControlWindow: maxReceiveConnectionFlowControlWindow,
 		Scheduler:                             config.Scheduler,
+		WeightsFile:                           config.WeightsFile,
+		Training:                              config.Training,
+		Epsilon:                               config.Epsilon,
+		AllowedCongestion:                     config.AllowedCongestion,
+		DumpExperiences:                       config.DumpExperiences,
 	}
 }
 

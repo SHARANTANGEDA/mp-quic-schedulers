@@ -209,7 +209,12 @@ func (s *session) setup(
 		s.config.IdleTimeout,
 	)
 
-	s.scheduler = &scheduler{}
+	s.scheduler = &scheduler{
+		SchedulerName:     s.config.Scheduler,
+		Training:          s.config.Training,
+		AllowedCongestion: s.config.AllowedCongestion,
+		DumpExp:           s.config.DumpExperiences,
+	}
 	s.scheduler.setup()
 
 	if pconnMgr == nil && conn != nil {
@@ -822,6 +827,9 @@ func (s *session) logPacket(packet *packedPacket, pathID protocol.PathID) {
 		// We don't need to allocate the slices for calling the format functions
 		return
 	}
+	utils.Debugf("Time: %d", time.Since(s.sessionCreationTime).Nanoseconds()/1000000)
+	utils.Debugf("Path: %d, Cong: %d", pathID, s.paths[pathID].sentPacketHandler.GetCongestionWindow())
+	utils.Debugf("Path: %d, BytesInFlight: %d", pathID, s.paths[pathID].sentPacketHandler.GetBytesInFlight())
 	utils.Debugf("-> Sending packet 0x%x (%d bytes) for connection %x on path %x, %s", packet.number, len(packet.raw), s.connectionID, pathID, packet.encryptionLevel)
 	for _, frame := range packet.frames {
 		wire.LogFrame(frame, true)

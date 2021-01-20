@@ -3,6 +3,7 @@ module github.com/SHARANTANGEDA/mp-quic
 go 1.14
 
 require (
+	github.com/SHARANTANGEDA/gorl v1.0.0
 	github.com/bifurcation/mint v0.0.0-20171208133358-a6080d464fb5
 	github.com/golang/mock v1.4.4
 	github.com/hashicorp/golang-lru v0.5.4
@@ -16,4 +17,5 @@ require (
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381
 	golang.org/x/sys v0.0.0-20201231184435-2d18734c6014 // indirect
+	gonum.org/v1/gonum v0.8.2
 )

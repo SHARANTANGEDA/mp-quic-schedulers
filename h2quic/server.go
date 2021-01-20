@@ -12,12 +12,13 @@ import (
 	"sync/atomic"
 	"time"
 
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/hpack"
+
+	quic "github.com/SHARANTANGEDA/mp-quic"
 	"github.com/SHARANTANGEDA/mp-quic/internal/protocol"
 	"github.com/SHARANTANGEDA/mp-quic/internal/utils"
 	"github.com/SHARANTANGEDA/mp-quic/qerr"
-	quic "github.com/lucas-clemente/quic-go"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/hpack"
 )
 
 type streamCreator interface {
@@ -296,12 +297,15 @@ func (s *Server) SetQuicHeaders(hdr http.Header) error {
 // ListenAndServeQUIC listens on the UDP network address addr and calls the
 // handler for HTTP/2 requests on incoming connections. http.DefaultServeMux is
 // used when handler is nil.
-func ListenAndServeQUIC(addr, certFile, keyFile string, handler http.Handler) error {
+func ListenAndServeQUIC(addr, certFile, keyFile string, handler http.Handler, scheduler string, weightsFile string,
+	training bool, epsilon float64, valid_congestion int, dumpExp bool) error {
 	server := &Server{
 		Server: &http.Server{
 			Addr:    addr,
 			Handler: handler,
 		},
+		QuicConfig: &quic.Config{Scheduler: scheduler, WeightsFile: weightsFile, Training: training, Epsilon: epsilon,
+			AllowedCongestion: valid_congestion, DumpExperiences: dumpExp},
 	}
 	return server.ListenAndServeTLS(certFile, keyFile)
 }
