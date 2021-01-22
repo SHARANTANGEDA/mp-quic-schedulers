@@ -8,6 +8,6 @@ const (
 	SCHEDULER_PEEKABOO    = "peekaboo"
 	SCHEDULER_ECF         = "ecf"
 	SCHEDULER_BLEST       = "blest"
-	SCHEDULER_DQNA        = "dqna"
+	SCHEDULER_DQNA        = "dqnAgent"
 	SCHEDULER_FIRST_PATH  = "first_path"
 )
