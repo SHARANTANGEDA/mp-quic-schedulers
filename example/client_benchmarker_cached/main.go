@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	quic "github.com/lucas-clemente/quic-go"
+	quic "github.com/SHARANTANGEDA/mp-quic"
 
 	"github.com/SHARANTANGEDA/mp-quic/h2quic"
 	"github.com/SHARANTANGEDA/mp-quic/internal/utils"

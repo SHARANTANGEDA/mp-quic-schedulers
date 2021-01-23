@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"github.com/SHARANTANGEDA/mp-quic/constants"
 	"io"
 	"net"
 	"net/http"
@@ -17,10 +18,10 @@ import (
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/hpack"
 
+	quic "github.com/SHARANTANGEDA/mp-quic"
 	"github.com/SHARANTANGEDA/mp-quic/internal/protocol"
 	"github.com/SHARANTANGEDA/mp-quic/internal/testdata"
 	"github.com/SHARANTANGEDA/mp-quic/qerr"
-	quic "github.com/lucas-clemente/quic-go"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -502,7 +503,8 @@ var _ = Describe("H2 server", func() {
 			return nil, testErr
 		}
 		fullpem, privkey := testdata.GetCertificatePaths()
-		err := ListenAndServeQUIC("", fullpem, privkey, nil)
+		err := ListenAndServeQUIC("", fullpem, privkey, nil, constants.SCHEDULER_ROUND_ROBIN,
+			"", false, 0.1, 10, false)
 		Expect(err).To(MatchError(testErr))
 	})
 })

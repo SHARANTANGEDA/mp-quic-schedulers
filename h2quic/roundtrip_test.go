@@ -8,7 +8,8 @@ import (
 	"net/http"
 	"time"
 
-	quic "github.com/lucas-clemente/quic-go"
+	quic "github.com/SHARANTANGEDA/mp-quic"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

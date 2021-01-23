@@ -72,15 +72,22 @@ type scheduler struct {
 	DumpExp   bool
 	DumpPath  string
 	dumpAgent experienceAgent
+
+	// Output Directory
+	outputDir string
 }
 
 func (sch *scheduler) setup() {
+	sch.outputDir = os.Getenv(constants.OUTPUT_DIR)
+	if sch.outputDir == "" {
+		panic("`outputDir` Env variable was not provided, this is needed for training")
+	}
 	sch.quotas = make(map[protocol.PathID]uint)
 	sch.retrans = make(map[protocol.PathID]uint64)
 	sch.waiting = 0
 
 	//Read lin to buffer
-	file, err := os.Open("/App/output/lin")
+	file, err := os.Open(sch.outputDir + "/lin")
 	if err != nil {
 		panic(err)
 	}
@@ -1249,9 +1256,9 @@ func (sch *scheduler) performPacketSending(s *session, windowUpdateFrames []*wir
 				}
 				s.pathsLock.RUnlock()
 				//Write lin parameters
-				os.Remove("/App/output/lin")
-				os.Create("/App/output/lin")
-				file2, _ := os.OpenFile("/App/output/lin", os.O_WRONLY, 0600)
+				os.Remove(sch.outputDir + "/lin")
+				os.Create(sch.outputDir + "/lin")
+				file2, _ := os.OpenFile(sch.outputDir+"/lin", os.O_WRONLY, 0600)
 				for i := 0; i < banditDimension; i++ {
 					for j := 0; j < banditDimension; j++ {
 						fmt.Fprintf(file2, "%.8f\n", sch.MAaF[i][j])

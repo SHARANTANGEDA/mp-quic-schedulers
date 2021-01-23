@@ -19,10 +19,10 @@ import (
 	"strconv"
 	"time"
 
+	quic "github.com/SHARANTANGEDA/mp-quic"
 	"github.com/SHARANTANGEDA/mp-quic/h2quic"
 	"github.com/SHARANTANGEDA/mp-quic/integrationtests/tools/testserver"
 	"github.com/SHARANTANGEDA/mp-quic/internal/protocol"
-	quic "github.com/lucas-clemente/quic-go"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

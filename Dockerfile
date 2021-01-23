@@ -38,7 +38,7 @@ ENV LANGUAGE en_US:en
 ENV LC_ALL en_US
 WORKDIR /notebooks
 COPY notebooks/*.ipynb /notebooks/
-WORKDIR /App
-COPY . /App
+WORKDIR /app
+COPY . /app
 WORKDIR /notebooks
 CMD service openvswitch-switch start && jupyter notebook --ip 0.0.0.0 --allow-root
