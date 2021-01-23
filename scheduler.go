@@ -87,7 +87,8 @@ func (sch *scheduler) setup() {
 	sch.waiting = 0
 
 	//Read lin to buffer
-	file, err := os.Open(sch.outputDir + "/lin")
+	linFileName := sch.outputDir + "/lin"
+	file, err := os.OpenFile(linFileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		panic(err)
 	}
