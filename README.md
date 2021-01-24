@@ -15,6 +15,9 @@ This version of mp-quic is not dependent on quic-go, and can be installed as a s
 - Install hdf5 library in your PC before executing this 
 	
 	In mac: ` brew install hdf5`
+	
+	In Ubuntu: 	`  sudo apt-get install libhdf5-serial-dev`
+
 
 - Run ` export GOPRIVATE=github.com/SHARANTANGEDA` in command-line before importing private-packages
 
