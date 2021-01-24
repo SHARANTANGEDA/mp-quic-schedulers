@@ -24,7 +24,7 @@ This version of mp-quic is not dependent on quic-go, and can be installed as a s
 
 We currently support Go **_1.14+_**
 
-Essential Environment Variables: `outputDir="ABSOLUTE_PATH_TO_OUTPUT_DIR` is needed for 
+Essential Environment Variables: `OUTPUT_DIR="ABSOLUTE_PATH_TO_OUTPUT_DIR` is needed for 
 scheduler implementation in native application
 
 Choosing Schedulers:
