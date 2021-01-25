@@ -2,5 +2,5 @@ package constants
 
 const (
 	// Env Variable
-	OUTPUT_DIR = "OUTPUT_DIR"
+	PROJECT_HOME_DIR = "PROJECT_HOME_DIR"
 )
