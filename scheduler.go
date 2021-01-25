@@ -73,21 +73,21 @@ type scheduler struct {
 	DumpPath  string
 	dumpAgent experienceAgent
 
-	// Output Directory
-	outputDir string
+	// Project Home Directory
+	projectHomeDir string
 }
 
 func (sch *scheduler) setup() {
-	sch.outputDir = os.Getenv(constants.OUTPUT_DIR)
-	if sch.outputDir == "" {
-		panic("`outputDir` Env variable was not provided, this is needed for training")
+	sch.projectHomeDir = os.Getenv(constants.PROJECT_HOME_DIR)
+	if sch.projectHomeDir == "" {
+		panic("`PROJECT_HOME_DIR` Env variable was not provided, this is needed for training")
 	}
 	sch.quotas = make(map[protocol.PathID]uint)
 	sch.retrans = make(map[protocol.PathID]uint64)
 	sch.waiting = 0
 
 	//Read lin to buffer
-	linFileName := sch.outputDir + "/lin"
+	linFileName := sch.projectHomeDir + "/sch_out/lin"
 	file, err := os.OpenFile(linFileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		panic(err)
@@ -1257,9 +1257,9 @@ func (sch *scheduler) performPacketSending(s *session, windowUpdateFrames []*wir
 				}
 				s.pathsLock.RUnlock()
 				//Write lin parameters
-				os.Remove(sch.outputDir + "/lin")
-				os.Create(sch.outputDir + "/lin")
-				file2, _ := os.OpenFile(sch.outputDir+"/lin", os.O_WRONLY, 0600)
+				os.Remove(sch.projectHomeDir + "/sch_out/lin")
+				os.Create(sch.projectHomeDir + "/sch_out/lin")
+				file2, _ := os.OpenFile(sch.projectHomeDir+"/sch_out/lin", os.O_WRONLY, 0600)
 				for i := 0; i < banditDimension; i++ {
 					for j := 0; j < banditDimension; j++ {
 						fmt.Fprintf(file2, "%.8f\n", sch.MAaF[i][j])
@@ -1465,7 +1465,9 @@ func (sch *scheduler) sendPacket(s *session) error {
 
 func PrintSchedulerInfo(config *Config) {
 	// Scheduler Info
-	schedulerList := []string{constants.SCHEDULER_ROUND_ROBIN, constants.SCHEDULER_LOW_LATENCY}
+	schedulerList := []string{constants.SCHEDULER_ROUND_ROBIN, constants.SCHEDULER_LOW_LATENCY,
+		constants.SCHEDULER_PEEKABOO, constants.SCHEDULER_ECF, constants.SCHEDULER_DQNA, constants.SCHEDULER_BLEST,
+		constants.SCHEDULER_FIRST_PATH, constants.SCHEDULER_LOW_BANDIT, constants.SCHEDULER_RANDOM}
 	if config.Scheduler == "" {
 		fmt.Println("Using Default Multipath Scheduler: ", constants.SCHEDULER_ROUND_ROBIN)
 	} else if util.StringInSlice(schedulerList, config.Scheduler) {
