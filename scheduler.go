@@ -2,6 +2,7 @@ package quic
 
 import (
 	"fmt"
+	"github.com/Workiva/go-datastructures/queue"
 	"math"
 	"math/rand"
 	"os"
@@ -75,6 +76,14 @@ type scheduler struct {
 
 	// Project Home Directory
 	projectHomeDir string
+
+	// pathID Queue for Round Robin
+	pathQueue queue.Queue
+}
+
+type queuePathIdItem struct {
+	pathId protocol.PathID
+	path   *path
 }
 
 func (sch *scheduler) setup() {
@@ -182,6 +191,11 @@ func (sch *scheduler) selectPathRoundRobin(s *session, hasRetransmission bool, h
 		sch.setup()
 	}
 
+	// Log Path Id w/ Interface Name
+	//for pathId, pth := range s.paths {
+	//	fmt.Printf("Path Id: %d, Local Addr: %s, Remote Addr: %s \t", pathId, pth.conn.LocalAddr(), pth.conn.RemoteAddr())
+	//}
+
 	// XXX Avoid using PathID 0 if there is more than 1 path
 	if len(s.paths) <= 1 {
 		if !hasRetransmission && !s.paths[protocol.InitialPathID].SendingAllowed() {
@@ -190,44 +204,49 @@ func (sch *scheduler) selectPathRoundRobin(s *session, hasRetransmission bool, h
 		return s.paths[protocol.InitialPathID]
 	}
 
-	// TODO cope with decreasing number of paths (needed?)
-	var selectedPath *path
-	var lowerQuota, currentQuota uint
-	var ok bool
-
-	// Max possible value for lowerQuota at the beginning
-	lowerQuota = ^uint(0)
-
-pathLoop:
-	for pathID, pth := range s.paths {
-		// Don't block path usage if we retransmit, even on another path
-		if !hasRetransmission && !pth.SendingAllowed() {
-			continue pathLoop
+	if sch.pathQueue.Empty() {
+		for pathId, pth := range s.paths {
+			err := sch.pathQueue.Put(queuePathIdItem{pathId: pathId, path: pth})
+			if err != nil {
+				fmt.Println("Err Inserting in Queue, Error: ", err.Error())
+			}
 		}
-
-		// If this path is potentially failed, do no consider it for sending
-		if pth.potentiallyFailed.Get() {
-			continue pathLoop
-		}
-
-		// XXX Prevent using initial pathID if multiple paths
-		if pathID == protocol.InitialPathID {
-			continue pathLoop
-		}
-
-		currentQuota, ok = sch.quotas[pathID]
-		if !ok {
-			sch.quotas[pathID] = 0
-			currentQuota = 0
-		}
-
-		if currentQuota < lowerQuota {
-			selectedPath = pth
-			lowerQuota = currentQuota
+	} else if int64(len(s.paths)) != sch.pathQueue.Len() {
+		sch.pathQueue.Get(sch.pathQueue.Len())
+		for pathId, pth := range s.paths {
+			err := sch.pathQueue.Put(queuePathIdItem{pathId: pathId, path: pth})
+			if err != nil {
+				fmt.Println("Err Inserting in Queue, Error: ", err.Error())
+			}
 		}
 	}
 
-	return selectedPath
+pathLoop:
+	for pathID, pth := range s.paths {
+		pathIdFromQueue, _ := sch.pathQueue.Peek()
+		pathIdObj, ok := pathIdFromQueue.(queuePathIdItem)
+		if !ok {
+			panic("Invalid Interface Type Chosen")
+		}
+
+		// Don't block path usage if we retransmit, even on another path
+		// If this path is potentially failed, do no consider it for sending
+		// XXX Prevent using initial pathID if multiple paths
+		if (!hasRetransmission && !pth.SendingAllowed()) || pth.potentiallyFailed.Get() || pathID == protocol.InitialPathID {
+			if pathIdObj.pathId == pathID {
+				_, _ = sch.pathQueue.Get(1)
+				_ = sch.pathQueue.Put(pathIdObj)
+			}
+			continue pathLoop
+		}
+
+		if pathIdObj.pathId == pathID {
+			_, _ = sch.pathQueue.Get(1)
+			_ = sch.pathQueue.Put(pathIdObj)
+			return pth
+		}
+	}
+	return nil
 
 }
 
@@ -1169,7 +1188,6 @@ func (sch *scheduler) selectPathDQNAgent(s *session, hasRetransmission bool, has
 
 // Lock of s.paths must be held
 func (sch *scheduler) selectPath(s *session, hasRetransmission bool, hasStreamRetransmission bool, fromPth *path) *path {
-
 	switch s.config.Scheduler {
 	case constants.SCHEDULER_ROUND_ROBIN:
 		return sch.selectPathRoundRobin(s, hasRetransmission, hasStreamRetransmission, fromPth)
