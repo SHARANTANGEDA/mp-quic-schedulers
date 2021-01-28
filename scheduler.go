@@ -197,35 +197,79 @@ func (sch *scheduler) selectPathRoundRobin(s *session, hasRetransmission bool, h
 
 	// Max possible value for lowerQuota at the beginning
 	lowerQuota = ^uint(0)
-
+	
+	var pathCount = len(s.paths)
+	var pathIDsArray [pathCount]int
+	k := 0
+	for pathID, pth := range s.paths {
+		pathIDsArray[k++] = pathID
+	}
+	
+	pathIDtoPick := pathIDsArray[0]
 pathLoop:
 	for pathID, pth := range s.paths {
-		// Don't block path usage if we retransmit, even on another path
-		if !hasRetransmission && !pth.SendingAllowed() {
-			continue pathLoop
-		}
+		if(pathID == pathIDtoPick) {
+			
+			// Don't block path usage if we retransmit, even on another path
+			if !hasRetransmission && !pth.SendingAllowed() {
+				if(pathIDtoPick==pathCount)
+					{pathIDtoPick=0}
+				else
+					{pathIDtoPick+=1}
+				continue pathLoop
+			}
 
-		// If this path is potentially failed, do no consider it for sending
-		if pth.potentiallyFailed.Get() {
-			continue pathLoop
-		}
+			// If this path is potentially failed, do no consider it for sending
+			if pth.potentiallyFailed.Get() {
+				if(pathIDtoPick==pathCount)
+					{pathIDtoPick=0}
+				else
+					{pathIDtoPick+=1}
+				continue pathLoop
+			}
 
-		// XXX Prevent using initial pathID if multiple paths
-		if pathID == protocol.InitialPathID {
-			continue pathLoop
-		}
-
-		currentQuota, ok = sch.quotas[pathID]
-		if !ok {
-			sch.quotas[pathID] = 0
-			currentQuota = 0
-		}
-
-		if currentQuota < lowerQuota {
+// 			// XXX Prevent using initial pathID if multiple paths
+// 			if pathID == protocol.InitialPathID {
+// 				continue pathLoop
+// 			}
+			
 			selectedPath = pth
-			lowerQuota = currentQuota
+			if(pathIDtoPick==pathCount)
+				{pathIDtoPick=0}
+			else
+				{pathIDtoPick+=1}
 		}
 	}
+	
+
+// pathLoop:
+// 	for pathID, pth := range s.paths {
+// 		// Don't block path usage if we retransmit, even on another path
+// 		if !hasRetransmission && !pth.SendingAllowed() {
+// 			continue pathLoop
+// 		}
+
+// 		// If this path is potentially failed, do no consider it for sending
+// 		if pth.potentiallyFailed.Get() {
+// 			continue pathLoop
+// 		}
+
+// 		// XXX Prevent using initial pathID if multiple paths
+// 		if pathID == protocol.InitialPathID {
+// 			continue pathLoop
+// 		}
+
+// 		currentQuota, ok = sch.quotas[pathID]
+// 		if !ok {
+// 			sch.quotas[pathID] = 0
+// 			currentQuota = 0
+// 		}
+
+// 		if currentQuota < lowerQuota {
+// 			selectedPath = pth
+// 			lowerQuota = currentQuota
+// 		}
+// 	}
 
 	return selectedPath
 
