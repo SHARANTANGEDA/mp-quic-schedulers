@@ -199,8 +199,11 @@ func (pcm *pconnManager) createPconns() error {
 		return err
 	}
 	for _, i := range ifaces {
-		// TODO (QDC): do this in a generic way
-		if !strings.Contains(i.Name, "eth") && !strings.Contains(i.Name, "rmnet") && !strings.Contains(i.Name, "wlan") {
+		if !strings.Contains(i.Name, "eth") &&
+			!strings.Contains(i.Name, "rmnet") &&
+			!strings.Contains(i.Name, "wlan") &&
+			!strings.Contains(i.Name, "enp") &&
+			!strings.Contains(i.Name, "wlp") {
 			continue
 		}
 		addrs, err := i.Addrs()
