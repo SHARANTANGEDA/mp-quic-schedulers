@@ -10,8 +10,6 @@ import (
 
 	"gonum.org/v1/gonum/mat"
 
-	"github.com/SHARANTANGEDA/gorl/agents"
-	"github.com/SHARANTANGEDA/gorl/types"
 	"github.com/SHARANTANGEDA/mp-quic/ackhandler"
 	"github.com/SHARANTANGEDA/mp-quic/constants"
 	"github.com/SHARANTANGEDA/mp-quic/internal/protocol"
@@ -30,13 +28,8 @@ type scheduler struct {
 	SchedulerName string
 	// Is training?
 	Training bool
-	// Training Agent
-	TrainingAgent agents.TrainingAgent
-	// Normal Agent
-	Agent agents.Agent
 
 	// Cached state for training
-	cachedState  types.Vector
 	cachedPathID protocol.PathID
 
 	AllowedCongestion int
@@ -44,14 +37,11 @@ type scheduler struct {
 	// async updated reward
 	record        uint64
 	episoderecord uint64
-	statevector   [6000]types.Vector
 	packetvector  [6000]uint64
-	//rewardvector [6000]types.Output
-	actionvector   [6000]int
-	recordDuration [6000]types.Output
-	lastfiretime   time.Time
-	zz             [6000]time.Time
-	waiting        uint64
+	actionvector  [6000]int
+	lastfiretime  time.Time
+	zz            [6000]time.Time
+	waiting       uint64
 
 	// linUCB
 	fe           uint64
@@ -123,15 +113,6 @@ func (sch *scheduler) setup() {
 	//TODO: expose to config
 	sch.DumpPath = "/tmp/"
 	sch.dumpAgent.Setup()
-
-	sch.cachedState = types.Vector{-1, -1}
-	if sch.SchedulerName == "dqnAgent" {
-		if sch.Training {
-			sch.TrainingAgent = GetTrainingAgent("", "", "", 0.)
-		} else {
-			sch.Agent = GetAgent("", "")
-		}
-	}
 }
 
 func (sch *scheduler) getRetransmission(s *session) (hasRetransmission bool, retransmitPacket *ackhandler.Packet, pth *path) {
@@ -1141,51 +1122,6 @@ func (sch *scheduler) selectFirstPath(s *session, hasRetransmission bool, hasStr
 	return nil
 }
 
-func (sch *scheduler) selectPathDQNAgent(s *session, hasRetransmission bool, hasStreamRetransmission bool, fromPth *path) *path {
-	// XXX Avoid using PathID 0 if there is more than 1 path
-	if len(s.paths) <= 1 {
-		if !hasRetransmission && !s.paths[protocol.InitialPathID].SendingAllowed() {
-			return nil
-		}
-		return s.paths[protocol.InitialPathID]
-	}
-
-	if len(s.paths) == 2 {
-		for pathID, path := range s.paths {
-			if pathID != protocol.InitialPathID {
-				utils.Debugf("Selecting path %d as unique path", pathID)
-				return path
-			}
-		}
-	}
-
-	//Check for available paths
-	var availablePaths []protocol.PathID
-	for pathID, path := range s.paths {
-		if path.sentPacketHandler.SendingAllowed() && pathID != protocol.InitialPathID {
-			availablePaths = append(availablePaths, pathID)
-		}
-	}
-
-	if len(availablePaths) == 0 {
-		if s.paths[protocol.InitialPathID].SendingAllowed() || hasRetransmission {
-			return s.paths[protocol.InitialPathID]
-		} else {
-			return nil
-		}
-	} else if len(availablePaths) == 1 {
-		return s.paths[availablePaths[0]]
-	}
-
-	action, paths := GetStateAndReward(sch, s)
-
-	if paths == nil {
-		return s.paths[protocol.InitialPathID]
-	}
-
-	return paths[action]
-}
-
 // Lock of s.paths must be held
 func (sch *scheduler) selectPath(s *session, hasRetransmission bool, hasStreamRetransmission bool, fromPth *path) *path {
 	switch s.config.Scheduler {
@@ -1197,8 +1133,6 @@ func (sch *scheduler) selectPath(s *session, hasRetransmission bool, hasStreamRe
 		return sch.selectFirstPath(s, hasRetransmission, hasStreamRetransmission, fromPth)
 	case constants.SCHEDULER_BLEST:
 		return sch.selectBLEST(s, hasRetransmission, hasStreamRetransmission, fromPth)
-	case constants.SCHEDULER_DQNA:
-		return sch.selectPathDQNAgent(s, hasRetransmission, hasStreamRetransmission, fromPth)
 	case constants.SCHEDULER_ECF:
 		return sch.selectECF(s, hasRetransmission, hasStreamRetransmission, fromPth)
 	case constants.SCHEDULER_LOW_BANDIT:
@@ -1253,22 +1187,7 @@ func (sch *scheduler) performPacketSending(s *session, windowUpdateFrames []*wir
 						sRTT[pathID] = pth.rttStats.SmoothedRTT()
 					}
 				}
-				utils.Infof("Action: %d", sch.actionvector)
-				utils.Infof("record: %d", sch.record)
-				utils.Infof("epsidoe: %d", sch.episoderecord)
-				utils.Infof("fe: %d", sch.fe)
-				utils.Infof("se: %d", sch.se)
-				if sch.Training && sch.SchedulerName == "dqnAgent" {
-					duration := time.Since(s.sessionCreationTime)
-					var maxRTT time.Duration
-					for pathID := range sRTT {
-						if sRTT[pathID] > maxRTT {
-							maxRTT = sRTT[pathID]
-						}
-					}
-					sch.TrainingAgent.CloseEpisode(uint64(s.connectionID), RewardFinalGoodput(sch, s, duration, maxRTT), false)
-				}
-				utils.Infof("Dump: %t, Training:%t, scheduler:%s", sch.DumpExp, sch.Training, sch.SchedulerName)
+
 				if sch.DumpExp && !sch.Training && sch.SchedulerName == "dqnAgent" {
 					utils.Infof("Closing episode %d", uint64(s.connectionID))
 					sch.dumpAgent.CloseExperience(uint64(s.connectionID))
@@ -1441,9 +1360,6 @@ func (sch *scheduler) sendPacket(s *session) error {
 		if err != nil {
 			if err == ackhandler.ErrTooManyTrackedSentPackets {
 				utils.Errorf("Closing episode")
-				if sch.SchedulerName == "dqnAgent" && sch.Training {
-					sch.TrainingAgent.CloseEpisode(uint64(s.connectionID), -100, false)
-				}
 			}
 			return err
 		}

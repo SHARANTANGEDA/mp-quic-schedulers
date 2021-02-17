@@ -3,7 +3,6 @@ module github.com/SHARANTANGEDA/mp-quic
 go 1.14
 
 require (
-	github.com/SHARANTANGEDA/gorl v1.0.0
 	github.com/Workiva/go-datastructures v1.0.52
 	github.com/bifurcation/mint v0.0.0-20171208133358-a6080d464fb5
 	github.com/golang/mock v1.4.4
