@@ -172,10 +172,10 @@ func (sch *scheduler) selectPathRoundRobin(s *session, hasRetransmission bool, h
 		sch.setup()
 	}
 
-	// Log Path Id w/ Interface Name
-	//for pathId, pth := range s.paths {
-	//	fmt.Printf("Path Id: %d, Local Addr: %s, Remote Addr: %s \t", pathId, pth.conn.LocalAddr(), pth.conn.RemoteAddr())
-	//}
+	//Log Path Id w/ Interface Name
+	for pathId, pth := range s.paths {
+		fmt.Printf("Path Id: %d, Local Addr: %s, Remote Addr: %s \t", pathId, pth.conn.LocalAddr(), pth.conn.RemoteAddr())
+	}
 
 	// XXX Avoid using PathID 0 if there is more than 1 path
 	if len(s.paths) <= 1 {
