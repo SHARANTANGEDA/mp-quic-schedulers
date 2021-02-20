@@ -1,6 +1,7 @@
 package quic
 
 import (
+	"fmt"
 	"net"
 	"strings"
 	"sync"
@@ -195,9 +196,14 @@ func (pcm *pconnManager) createPconn(ip net.IP) (*net.UDPAddr, error) {
 
 func (pcm *pconnManager) createPconns() error {
 	ifaces, err := net.Interfaces()
+
 	if err != nil {
 		return err
 	}
+	for _, i := range ifaces {
+		fmt.Printf("%s, ", i.Name)
+	}
+	fmt.Println("\n")
 	for _, i := range ifaces {
 		if !strings.Contains(i.Name, "eth") &&
 			!strings.Contains(i.Name, "rmnet") &&
