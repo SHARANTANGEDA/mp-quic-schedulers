@@ -977,6 +977,7 @@ pathLoop:
 
 	}
 
+	// TODO: Support More than 2 best Paths
 	if bestPath == nil {
 		if secondBestPath != nil {
 			return secondBestPath
@@ -1010,6 +1011,7 @@ pathLoop:
 		return nil
 	} else {
 		// Migrate from buffer to local variables
+		// TODO: Combine 4 loops to single loop
 		AaF := mat.NewDense(banditDimension, banditDimension, nil)
 		for i := 0; i < banditDimension; i++ {
 			for j := 0; j < banditDimension; j++ {
