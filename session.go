@@ -210,10 +210,12 @@ func (s *session) setup(
 	)
 
 	s.scheduler = &scheduler{
-		SchedulerName:     s.config.Scheduler,
-		Training:          s.config.Training,
-		AllowedCongestion: s.config.AllowedCongestion,
-		DumpExp:           s.config.DumpExperiences,
+		SchedulerName:      s.config.Scheduler,
+		Training:           s.config.Training,
+		AllowedCongestion:  s.config.AllowedCongestion,
+		DumpExp:            s.config.DumpExperiences,
+		OnlineTrainingFile: s.config.OnlineTrainingFile,
+		ModelOutputDir:     s.config.ModelOutputDir,
 	}
 	s.scheduler.setup()
 

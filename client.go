@@ -202,6 +202,11 @@ func populateClientConfig(config *Config) *Config {
 		CacheHandshake:                        config.CacheHandshake,
 		CreatePaths:                           config.CreatePaths,
 		Scheduler:                             config.Scheduler,
+		WeightsFile:                           config.WeightsFile,
+		Training:                              config.Training,
+		Epsilon:                               config.Epsilon,
+		AllowedCongestion:                     config.AllowedCongestion,
+		DumpExperiences:                       config.DumpExperiences,
 	}
 }
 
