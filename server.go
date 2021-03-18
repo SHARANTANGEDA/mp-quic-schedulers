@@ -4,7 +4,11 @@ import (
 	"bytes"
 	"crypto/tls"
 	"errors"
+	"fmt"
+	"github.com/SHARANTANGEDA/mp-quic/constants"
 	"net"
+	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -197,6 +201,23 @@ func populateServerConfig(config *Config) *Config {
 		maxReceiveConnectionFlowControlWindow = protocol.DefaultMaxReceiveConnectionFlowControlWindowServer
 	}
 
+	projectHomeDir := os.Getenv(constants.PROJECT_HOME_DIR)
+	if projectHomeDir == "" {
+		panic("`PROJECT_HOME_DIR` Env variable was not provided, this is needed for training")
+	}
+	if config.OnlineTrainingFile == "" {
+		os.MkdirAll(filepath.Join(projectHomeDir, constants.DEFAULT_TRAINING_DIR), os.ModePerm)
+		config.OnlineTrainingFile = filepath.Join(projectHomeDir, constants.DEFAULT_TRAINING_DIR,
+			constants.TRAINING_FILE_NAME)
+
+		fmt.Println("Default training Dir Path:")
+	}
+
+	if config.ModelOutputDir == "" {
+		os.MkdirAll(filepath.Join(projectHomeDir, constants.DEFAULT_MODEL_OUTPUT_DIR), os.ModePerm)
+		config.ModelOutputDir = filepath.Join(projectHomeDir, constants.DEFAULT_MODEL_OUTPUT_DIR)
+	}
+
 	PrintSchedulerInfo(config)
 
 	return &Config{
@@ -213,6 +234,8 @@ func populateServerConfig(config *Config) *Config {
 		Epsilon:                               config.Epsilon,
 		AllowedCongestion:                     config.AllowedCongestion,
 		DumpExperiences:                       config.DumpExperiences,
+		OnlineTrainingFile:                    config.OnlineTrainingFile,
+		ModelOutputDir:                        config.ModelOutputDir,
 	}
 }
 

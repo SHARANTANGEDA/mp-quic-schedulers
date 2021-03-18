@@ -131,6 +131,10 @@ type Config struct {
 	Epsilon           float64
 	AllowedCongestion int
 	DumpExperiences   bool
+
+	// Neural Network Specific Config
+	OnlineTrainingFile string
+	ModelOutputDir     string
 }
 
 // A Listener for incoming QUIC connections

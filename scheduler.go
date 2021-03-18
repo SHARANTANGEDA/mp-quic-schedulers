@@ -77,6 +77,12 @@ type scheduler struct {
 	// Project Home Directory
 	projectHomeDir string
 
+	// Neural Net Directory
+	OnlineTrainingFile string
+	ModelOutputDir     string
+
+	WriteHeaderColumn bool
+
 	// pathID Queue for Round Robin
 	pathQueue queue.Queue
 }
@@ -94,6 +100,8 @@ func (sch *scheduler) setup() {
 	sch.quotas = make(map[protocol.PathID]uint)
 	sch.retrans = make(map[protocol.PathID]uint64)
 	sch.waiting = 0
+
+	sch.WriteHeaderColumn = true
 
 	//Read lin to buffer
 	linFileName := sch.projectHomeDir + "/sch_out/lin"
@@ -248,6 +256,73 @@ pathLoop:
 	}
 	return nil
 
+}
+
+func (sch *scheduler) selectPathNeuralNet(s *session, hasRetransmission bool, hasStreamRetransmission bool, fromPth *path) *path {
+	if sch.quotas == nil {
+		sch.setup()
+	}
+
+	////Log Path Id w/ Interface Name
+	//for pathId, pth := range s.paths {
+	//	fmt.Printf("Path Id: %d, Local Addr: %s, Remote Addr: %s \t", pathId, pth.conn.LocalAddr(), pth.conn.RemoteAddr())
+	//}
+
+	// XXX Avoid using PathID 0 if there is more than 1 path
+	if len(s.paths) <= 1 {
+		if !hasRetransmission && !s.paths[protocol.InitialPathID].SendingAllowed() {
+			return nil
+		}
+		return s.paths[protocol.InitialPathID]
+	} else if len(s.paths) > 3 {
+		return sch.selectPathRoundRobin(s, hasRetransmission, hasStreamRetransmission, fromPth)
+	}
+
+	// Load Model
+
+	if sch.pathQueue.Empty() {
+		for pathId, pth := range s.paths {
+			err := sch.pathQueue.Put(queuePathIdItem{pathId: pathId, path: pth})
+			if err != nil {
+				fmt.Println("Err Inserting in Queue, Error: ", err.Error())
+			}
+		}
+	} else if int64(len(s.paths)) != sch.pathQueue.Len() {
+		sch.pathQueue.Get(sch.pathQueue.Len())
+		for pathId, pth := range s.paths {
+			err := sch.pathQueue.Put(queuePathIdItem{pathId: pathId, path: pth})
+			if err != nil {
+				fmt.Println("Err Inserting in Queue, Error: ", err.Error())
+			}
+		}
+	}
+
+pathLoop:
+	for pathID, pth := range s.paths {
+		pathIdFromQueue, _ := sch.pathQueue.Peek()
+		pathIdObj, ok := pathIdFromQueue.(queuePathIdItem)
+		if !ok {
+			panic("Invalid Interface Type Chosen")
+		}
+
+		// Don't block path usage if we retransmit, even on another path
+		// If this path is potentially failed, do no consider it for sending
+		// XXX Prevent using initial pathID if multiple paths
+		if (!hasRetransmission && !pth.SendingAllowed()) || pth.potentiallyFailed.Get() || pathID == protocol.InitialPathID {
+			if pathIdObj.pathId == pathID {
+				_, _ = sch.pathQueue.Get(1)
+				_ = sch.pathQueue.Put(pathIdObj)
+			}
+			continue pathLoop
+		}
+
+		if pathIdObj.pathId == pathID {
+			_, _ = sch.pathQueue.Get(1)
+			_ = sch.pathQueue.Put(pathIdObj)
+			return pth
+		}
+	}
+	return nil
 }
 
 func (sch *scheduler) selectPathLowLatency(s *session, hasRetransmission bool, hasStreamRetransmission bool, fromPth *path) *path {
@@ -1209,6 +1284,8 @@ func (sch *scheduler) selectPath(s *session, hasRetransmission bool, hasStreamRe
 		return sch.selectPathPeek(s, hasRetransmission, hasStreamRetransmission, fromPth)
 	case constants.SCHEDULER_RANDOM:
 		return sch.selectPathRandom(s, hasRetransmission, hasStreamRetransmission, fromPth)
+	case constants.SCHEDULER_NEURAL_NET:
+		return sch.selectPathNeuralNet(s, hasRetransmission, hasStreamRetransmission, fromPth)
 	default:
 		return sch.selectPathRoundRobin(s, hasRetransmission, hasStreamRetransmission, fromPth)
 	}
@@ -1389,6 +1466,7 @@ func (sch *scheduler) sendPacket(s *session) error {
 		// Select the path here
 		s.pathsLock.RLock()
 		pth = sch.selectPath(s, hasRetransmission, hasStreamRetransmission, fromPth)
+		sch.logTrainingData(s, pth, sch.OnlineTrainingFile)
 		s.pathsLock.RUnlock()
 
 		// XXX No more path available, should we have a new QUIC error message?
