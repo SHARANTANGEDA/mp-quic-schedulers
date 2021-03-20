@@ -1466,7 +1466,7 @@ func (sch *scheduler) sendPacket(s *session) error {
 		// Select the path here
 		s.pathsLock.RLock()
 		pth = sch.selectPath(s, hasRetransmission, hasStreamRetransmission, fromPth)
-		sch.logTrainingData(s, pth, sch.OnlineTrainingFile)
+		go sch.logTrainingData(s, pth, sch.OnlineTrainingFile)
 		s.pathsLock.RUnlock()
 
 		// XXX No more path available, should we have a new QUIC error message?

@@ -11,7 +11,9 @@ import (
 func (sch *scheduler) logTrainingData(s *session, selectedPath *path, trainingFile string) {
 
 	var secondBestPath *path
-
+	if selectedPath == nil {
+		return
+	}
 	for pathID, pth := range s.paths {
 		// XXX Prevent using initial pathID if multiple paths
 		if pathID == protocol.InitialPathID || pathID == selectedPath.pathID {
@@ -37,7 +39,7 @@ func (sch *scheduler) logTrainingData(s *session, selectedPath *path, trainingFi
 
 	file, err := os.OpenFile(trainingFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.ModePerm)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error in file: ", err, trainingFile)
 	}
 	if sch.WriteHeaderColumn {
 		file.WriteString("path_id,cwnd_1,cwnd_2,in_flight_1,in_flight_2,rtt_1,rtt_2,avg_rtt_1,avg_rtt_2")
@@ -48,5 +50,5 @@ func (sch *scheduler) logTrainingData(s *session, selectedPath *path, trainingFi
 		file.WriteString(fmt.Sprintf("\n%d,%f,%f,%f,%f,%d,%d,%d,%d\n", selectedPathId, cwndBest, cwndSecond,
 			inflightFirst, inflightSecond, bestPathRTT, secondBestPathRTT, firstPathAvgRTT, secondPathAvgRTT))
 	}
-	file.Close()
+	_ = file.Close()
 }
