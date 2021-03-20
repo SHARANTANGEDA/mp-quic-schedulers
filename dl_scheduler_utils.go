@@ -11,6 +11,9 @@ import (
 func (sch *scheduler) logTrainingData(s *session, selectedPath *path, trainingFile string) {
 
 	var secondBestPath *path
+	if selectedPath == nil {
+		return
+	}
 
 	for pathID, pth := range s.paths {
 		// XXX Prevent using initial pathID if multiple paths
@@ -48,5 +51,5 @@ func (sch *scheduler) logTrainingData(s *session, selectedPath *path, trainingFi
 		file.WriteString(fmt.Sprintf("\n%d,%f,%f,%f,%f,%d,%d,%d,%d\n", selectedPathId, cwndBest, cwndSecond,
 			inflightFirst, inflightSecond, bestPathRTT, secondBestPathRTT, firstPathAvgRTT, secondPathAvgRTT))
 	}
-	file.Close()
+	_ = file.Close()
 }
