@@ -236,6 +236,7 @@ func populateServerConfig(config *Config) *Config {
 		DumpExperiences:                       config.DumpExperiences,
 		OnlineTrainingFile:                    config.OnlineTrainingFile,
 		ModelOutputDir:                        config.ModelOutputDir,
+		shouldStartTraining:                   false,
 	}
 }
 

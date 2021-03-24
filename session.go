@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"os"
 	"sync"
 	"time"
 
@@ -90,6 +91,8 @@ type session struct {
 
 	ctx       context.Context
 	ctxCancel context.CancelFunc
+
+	TrainingProcess *os.Process
 
 	// when we receive too many undecryptable packets during the handshake, we send a Public reset
 	// but only after a time of protocol.PublicResetTimeout has passed
@@ -210,12 +213,13 @@ func (s *session) setup(
 	)
 
 	s.scheduler = &scheduler{
-		SchedulerName:      s.config.Scheduler,
-		Training:           s.config.Training,
-		AllowedCongestion:  s.config.AllowedCongestion,
-		DumpExp:            s.config.DumpExperiences,
-		OnlineTrainingFile: s.config.OnlineTrainingFile,
-		ModelOutputDir:     s.config.ModelOutputDir,
+		SchedulerName:       s.config.Scheduler,
+		Training:            s.config.Training,
+		AllowedCongestion:   s.config.AllowedCongestion,
+		DumpExp:             s.config.DumpExperiences,
+		OnlineTrainingFile:  s.config.OnlineTrainingFile,
+		ModelOutputDir:      s.config.ModelOutputDir,
+		ShouldStartTraining: s.config.shouldStartTraining,
 	}
 	s.scheduler.setup()
 
@@ -323,6 +327,7 @@ func (s *session) run() error {
 	aeadChanged := s.aeadChanged
 
 	var timerPth *path
+	defer s.TrainingProcess.Kill()
 
 runLoop:
 	for {

@@ -78,8 +78,10 @@ type scheduler struct {
 	projectHomeDir string
 
 	// Neural Net Directory
-	OnlineTrainingFile string
-	ModelOutputDir     string
+	OnlineTrainingFile  string
+	ModelOutputDir      string
+	ShouldStartTraining bool
+	TrainingProcess     *os.Process
 
 	WriteHeaderColumn bool
 

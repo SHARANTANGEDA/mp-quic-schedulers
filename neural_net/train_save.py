@@ -1,4 +1,3 @@
-import argparse
 import logging
 import os
 from datetime import datetime
@@ -30,6 +29,7 @@ def train_save_model(training_file, epochs, output_dir):
 	model.add(Dense(1, activation='sigmoid'))
 
 	model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+	logging.info("Model has been compiled")
 
 	model.fit(train_X, train_Y, epochs=epochs, validation_data=(val_X, val_Y))
 
@@ -42,20 +42,3 @@ def train_save_model(training_file, epochs, output_dir):
 	# Evaluate
 	test_loss, test_acc = model.evaluate(test_X, test_Y)
 	logging.info("Test loss: {}, Test Accuracy: {}".format(test_loss, test_acc))
-	return 1
-
-
-parser = argparse.ArgumentParser(description='Train & Save Model')
-parser.add_argument('--epochs', type=int, dest="epochs", help="Num of epochs to run", default=3)
-parser.add_argument('--training_file', type=str, dest="training_file", help="Absolute Path to training file", required=True)
-parser.add_argument('--output_dir', type=str, dest="output_dir", help="Absolute Path to output dir", required=True)
-
-args = parser.parse_args()
-
-logs_dir = os.path.join(os.getenv("PROJECT_HOME_DIR"), "nn_logs")
-os.makedirs(logs_dir, exist_ok=True)
-logging.basicConfig(filename=os.path.join(logs_dir, f'{datetime.now()}.txt'), filemode='w+',
-										format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-										datefmt='%H:%M:%S', level=logging.DEBUG)
-logging.getLogger().setLevel(logging.INFO)
-train_save_model(args.training_file, args.epochs, args.output_dir)
