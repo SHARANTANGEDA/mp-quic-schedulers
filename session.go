@@ -444,6 +444,9 @@ runLoop:
 		s.handshakeCompleteChan <- closeErr.err
 		s.handshakeChan <- handshakeEvent{err: closeErr.err}
 	}
+	//if s.TrainingProcess != nil {
+	//	defer s.TrainingProcess.Kill()
+	//}
 	s.handleCloseError(closeErr)
 	defer s.ctxCancel()
 	return closeErr.err

@@ -6,8 +6,10 @@ require (
 	github.com/SHARANTANGEDA/gorl v1.0.0
 	github.com/Workiva/go-datastructures v1.0.52
 	github.com/bifurcation/mint v0.0.0-20171208133358-a6080d464fb5
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/galeone/tensorflow v2.4.0-rc0.0.20210202175351-640a390c2283+incompatible
+	github.com/galeone/tfgo v0.0.0-20210204182614-84b9a5e77f79
 	github.com/golang/mock v1.4.4
-	github.com/google/uuid v1.2.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/lucas-clemente/aes12 v0.0.0-20171027163421-cd47fb39b79f
@@ -16,10 +18,7 @@ require (
 	github.com/lucas-clemente/quic-go-certificates v0.0.0-20160823095156-d2f86524cced
 	github.com/onsi/ginkgo v1.14.0
 	github.com/onsi/gomega v1.10.1
-	github.com/patrikeh/go-deep v0.0.0-20191210195838-b811ffc4083e // indirect
-	github.com/stretchr/objx v0.3.0 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect
-	github.com/tinylib/msgp v1.1.5 // indirect
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/net v0.0.0-20201021035429-f5854403a974
 	golang.org/x/sys v0.0.0-20201231184435-2d18734c6014 // indirect

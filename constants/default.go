@@ -15,7 +15,7 @@ const (
 	// Directory Names
 	DEFAULT_TRAINING_DIR        = "online_training"
 	DEFAULT_CLIENT_TRAINING_DIR = "client_online_training"
-	DEFAULT_MODEL_OUTPUT_DIR    = "client_model_output"
+	DEFAULT_MODEL_OUTPUT_DIR    = "model_output"
 
 	// File names
 	TRAINING_FILE_NAME = "train.txt"
