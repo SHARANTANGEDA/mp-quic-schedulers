@@ -2,12 +2,18 @@ package quic
 
 import (
 	"fmt"
-	"github.com/Workiva/go-datastructures/queue"
+	"io/ioutil"
 	"math"
 	"math/rand"
 	"os"
+	"path/filepath"
+	"sort"
+	"strings"
 	"time"
 
+	"github.com/Workiva/go-datastructures/queue"
+	tf "github.com/galeone/tensorflow/tensorflow/go"
+	tg "github.com/galeone/tfgo"
 	"gonum.org/v1/gonum/mat"
 
 	"github.com/SHARANTANGEDA/gorl/agents"
@@ -81,8 +87,6 @@ type scheduler struct {
 	OnlineTrainingFile string
 	ModelOutputDir     string
 
-	WriteHeaderColumn bool
-
 	// pathID Queue for Round Robin
 	pathQueue queue.Queue
 }
@@ -93,15 +97,18 @@ type queuePathIdItem struct {
 }
 
 func (sch *scheduler) setup() {
+	err := os.Setenv("TF_CPP_MIN_LOG_LEVEL", "2")
+	if err != nil {
+		fmt.Println("TF Environment Error:", err.Error())
+	}
 	sch.projectHomeDir = os.Getenv(constants.PROJECT_HOME_DIR)
 	if sch.projectHomeDir == "" {
-		panic("`PROJECT_HOME_DIR` Env variable was not provided, this is needed for training")
+		panic("`PROJECT_HOME_DIR` Env variable was not provided")
 	}
+
 	sch.quotas = make(map[protocol.PathID]uint)
 	sch.retrans = make(map[protocol.PathID]uint64)
 	sch.waiting = 0
-
-	sch.WriteHeaderColumn = true
 
 	//Read lin to buffer
 	linFileName := sch.projectHomeDir + "/sch_out/lin"
@@ -278,51 +285,114 @@ func (sch *scheduler) selectPathNeuralNet(s *session, hasRetransmission bool, ha
 		return sch.selectPathRoundRobin(s, hasRetransmission, hasStreamRetransmission, fromPth)
 	}
 
-	// Load Model
-
-	if sch.pathQueue.Empty() {
-		for pathId, pth := range s.paths {
-			err := sch.pathQueue.Put(queuePathIdItem{pathId: pathId, path: pth})
-			if err != nil {
-				fmt.Println("Err Inserting in Queue, Error: ", err.Error())
-			}
-		}
-	} else if int64(len(s.paths)) != sch.pathQueue.Len() {
-		sch.pathQueue.Get(sch.pathQueue.Len())
-		for pathId, pth := range s.paths {
-			err := sch.pathQueue.Put(queuePathIdItem{pathId: pathId, path: pth})
-			if err != nil {
-				fmt.Println("Err Inserting in Queue, Error: ", err.Error())
-			}
-		}
-	}
+	var bestPath *path
+	var secondBestPath *path
+	var lowerRTT time.Duration
+	var currentRTT time.Duration
+	var secondLowerRTT time.Duration
+	bestPathID := protocol.PathID(255)
 
 pathLoop:
 	for pathID, pth := range s.paths {
-		pathIdFromQueue, _ := sch.pathQueue.Peek()
-		pathIdObj, ok := pathIdFromQueue.(queuePathIdItem)
-		if !ok {
-			panic("Invalid Interface Type Chosen")
-		}
-
-		// Don't block path usage if we retransmit, even on another path
-		// If this path is potentially failed, do no consider it for sending
-		// XXX Prevent using initial pathID if multiple paths
-		if (!hasRetransmission && !pth.SendingAllowed()) || pth.potentiallyFailed.Get() || pathID == protocol.InitialPathID {
-			if pathIdObj.pathId == pathID {
-				_, _ = sch.pathQueue.Get(1)
-				_ = sch.pathQueue.Put(pathIdObj)
-			}
+		// If this path is potentially failed, do not consider it for sending
+		if pth.potentiallyFailed.Get() {
 			continue pathLoop
 		}
 
-		if pathIdObj.pathId == pathID {
-			_, _ = sch.pathQueue.Get(1)
-			_ = sch.pathQueue.Put(pathIdObj)
-			return pth
+		// XXX Prevent using initial pathID if multiple paths
+		if pathID == protocol.InitialPathID {
+			continue pathLoop
+		}
+
+		currentRTT = pth.rttStats.SmoothedRTT()
+
+		// Prefer staying single-path if not blocked by current path
+		// Don't consider this sample if the smoothed RTT is 0
+		if lowerRTT != 0 && currentRTT == 0 {
+			continue pathLoop
+		}
+
+		// Case if we have multiple paths unprobed
+		if currentRTT == 0 {
+			currentQuota, ok := sch.quotas[pathID]
+			if !ok {
+				sch.quotas[pathID] = 0
+				currentQuota = 0
+			}
+			lowerQuota, _ := sch.quotas[bestPathID]
+			if bestPath != nil && currentQuota > lowerQuota {
+				continue pathLoop
+			}
+		}
+
+		if currentRTT >= lowerRTT {
+			if (secondLowerRTT == 0 || currentRTT < secondLowerRTT) && pth.SendingAllowed() {
+				// Update second best available path
+				secondLowerRTT = currentRTT
+				secondBestPath = pth
+			}
+			if currentRTT != 0 && lowerRTT != 0 && bestPath != nil {
+				continue pathLoop
+			}
+		}
+
+		// Update
+		lowerRTT = currentRTT
+		bestPath = pth
+		bestPathID = pathID
+
+	}
+
+	if bestPath == nil || secondBestPath == nil {
+		return sch.selectPathRoundRobin(s, hasRetransmission, hasStreamRetransmission, fromPth)
+	}
+
+	// Get Latest Model Directory Name
+	models, err := ioutil.ReadDir(sch.ModelOutputDir)
+	if err != nil {
+		return sch.selectPathRandom(s, hasRetransmission, hasStreamRetransmission, fromPth)
+	}
+	var modelNames []string
+	for _, f := range models {
+		fileName := f.Name()
+		if strings.Contains(fileName, "model_") {
+			modelNames = append(modelNames, fileName)
 		}
 	}
-	return nil
+	if modelNames == nil {
+		return sch.selectPathRandom(s, hasRetransmission, hasStreamRetransmission, fromPth)
+	}
+	sort.Strings(modelNames)
+
+	latestModel := modelNames[len(modelNames)-1]
+	fmt.Println("Latest Model:", latestModel)
+
+	// Load Model
+	_, err = tf.LoadSavedModel(filepath.Join(sch.ModelOutputDir, latestModel), []string{"serve"}, nil)
+	if err != nil {
+		return sch.selectPathRoundRobin(s, hasRetransmission, hasStreamRetransmission, fromPth)
+	}
+	savedModel := tg.LoadModel(filepath.Join(sch.ModelOutputDir, latestModel), []string{"serve"}, nil)
+
+	//Features
+	cwndBest := float32(bestPath.sentPacketHandler.GetCongestionWindow())
+	cwndSecond := float32(secondBestPath.sentPacketHandler.GetCongestionWindow())
+	inflightf := float32(bestPath.sentPacketHandler.GetBytesInFlight())
+	inflights := float32(secondBestPath.sentPacketHandler.GetBytesInFlight())
+	llowerRTT := bestPath.rttStats.LatestRTT()
+	lsecondLowerRTT := secondBestPath.rttStats.LatestRTT()
+	input, _ := tf.NewTensor([1][8]float32{{cwndBest, cwndSecond, inflightf, inflights, float32(llowerRTT),
+		float32(lsecondLowerRTT), float32(bestPath.rttStats.SmoothedRTT()), float32(secondBestPath.rttStats.SmoothedRTT())}})
+
+	result := savedModel.Exec([]tf.Output{
+		savedModel.Op("StatefulPartitionedCall", 0),
+	}, map[tf.Output]*tf.Tensor{
+		savedModel.Op("serving_default_input_input", 0): input,
+	})
+	pred := result[0].Value()
+	fmt.Printf("Debug prediction: %v", pred)
+
+	return sch.selectPathRoundRobin(s, hasRetransmission, hasStreamRetransmission, fromPth)
 }
 
 func (sch *scheduler) selectPathLowLatency(s *session, hasRetransmission bool, hasStreamRetransmission bool, fromPth *path) *path {
@@ -1284,8 +1354,6 @@ func (sch *scheduler) selectPath(s *session, hasRetransmission bool, hasStreamRe
 		return sch.selectPathPeek(s, hasRetransmission, hasStreamRetransmission, fromPth)
 	case constants.SCHEDULER_RANDOM:
 		return sch.selectPathRandom(s, hasRetransmission, hasStreamRetransmission, fromPth)
-	case constants.SCHEDULER_NEURAL_NET:
-		return sch.selectPathNeuralNet(s, hasRetransmission, hasStreamRetransmission, fromPth)
 	default:
 		return sch.selectPathRoundRobin(s, hasRetransmission, hasStreamRetransmission, fromPth)
 	}
@@ -1466,7 +1534,6 @@ func (sch *scheduler) sendPacket(s *session) error {
 		// Select the path here
 		s.pathsLock.RLock()
 		pth = sch.selectPath(s, hasRetransmission, hasStreamRetransmission, fromPth)
-		go sch.logTrainingData(s, pth, sch.OnlineTrainingFile)
 		s.pathsLock.RUnlock()
 
 		// XXX No more path available, should we have a new QUIC error message?
