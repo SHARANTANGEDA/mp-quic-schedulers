@@ -2,12 +2,17 @@ package quic
 
 import (
 	"fmt"
-	"github.com/Workiva/go-datastructures/queue"
+	"io/ioutil"
 	"math"
 	"math/rand"
 	"os"
+	"path/filepath"
+	"sort"
+	"strings"
 	"time"
 
+	"github.com/Workiva/go-datastructures/queue"
+	tf "github.com/tensorflow/tensorflow/tensorflow/go"
 	"gonum.org/v1/gonum/mat"
 
 	"github.com/SHARANTANGEDA/gorl/agents"
@@ -280,51 +285,117 @@ func (sch *scheduler) selectPathNeuralNet(s *session, hasRetransmission bool, ha
 		return sch.selectPathRoundRobin(s, hasRetransmission, hasStreamRetransmission, fromPth)
 	}
 
-	// Load Model
-
-	if sch.pathQueue.Empty() {
-		for pathId, pth := range s.paths {
-			err := sch.pathQueue.Put(queuePathIdItem{pathId: pathId, path: pth})
-			if err != nil {
-				fmt.Println("Err Inserting in Queue, Error: ", err.Error())
-			}
-		}
-	} else if int64(len(s.paths)) != sch.pathQueue.Len() {
-		sch.pathQueue.Get(sch.pathQueue.Len())
-		for pathId, pth := range s.paths {
-			err := sch.pathQueue.Put(queuePathIdItem{pathId: pathId, path: pth})
-			if err != nil {
-				fmt.Println("Err Inserting in Queue, Error: ", err.Error())
-			}
-		}
-	}
+	var bestPath *path
+	var secondBestPath *path
+	var lowerRTT time.Duration
+	var currentRTT time.Duration
+	var secondLowerRTT time.Duration
+	bestPathID := protocol.PathID(255)
 
 pathLoop:
 	for pathID, pth := range s.paths {
-		pathIdFromQueue, _ := sch.pathQueue.Peek()
-		pathIdObj, ok := pathIdFromQueue.(queuePathIdItem)
-		if !ok {
-			panic("Invalid Interface Type Chosen")
-		}
-
-		// Don't block path usage if we retransmit, even on another path
-		// If this path is potentially failed, do no consider it for sending
-		// XXX Prevent using initial pathID if multiple paths
-		if (!hasRetransmission && !pth.SendingAllowed()) || pth.potentiallyFailed.Get() || pathID == protocol.InitialPathID {
-			if pathIdObj.pathId == pathID {
-				_, _ = sch.pathQueue.Get(1)
-				_ = sch.pathQueue.Put(pathIdObj)
-			}
+		// If this path is potentially failed, do not consider it for sending
+		if pth.potentiallyFailed.Get() {
 			continue pathLoop
 		}
 
-		if pathIdObj.pathId == pathID {
-			_, _ = sch.pathQueue.Get(1)
-			_ = sch.pathQueue.Put(pathIdObj)
-			return pth
+		// XXX Prevent using initial pathID if multiple paths
+		if pathID == protocol.InitialPathID {
+			continue pathLoop
+		}
+
+		currentRTT = pth.rttStats.SmoothedRTT()
+
+		// Prefer staying single-path if not blocked by current path
+		// Don't consider this sample if the smoothed RTT is 0
+		if lowerRTT != 0 && currentRTT == 0 {
+			continue pathLoop
+		}
+
+		// Case if we have multiple paths unprobed
+		if currentRTT == 0 {
+			currentQuota, ok := sch.quotas[pathID]
+			if !ok {
+				sch.quotas[pathID] = 0
+				currentQuota = 0
+			}
+			lowerQuota, _ := sch.quotas[bestPathID]
+			if bestPath != nil && currentQuota > lowerQuota {
+				continue pathLoop
+			}
+		}
+
+		if currentRTT >= lowerRTT {
+			if (secondLowerRTT == 0 || currentRTT < secondLowerRTT) && pth.SendingAllowed() {
+				// Update second best available path
+				secondLowerRTT = currentRTT
+				secondBestPath = pth
+			}
+			if currentRTT != 0 && lowerRTT != 0 && bestPath != nil {
+				continue pathLoop
+			}
+		}
+
+		// Update
+		lowerRTT = currentRTT
+		bestPath = pth
+		bestPathID = pathID
+
+	}
+
+	if bestPath == nil || secondBestPath == nil {
+		return sch.selectPathRoundRobin(s, hasRetransmission, hasStreamRetransmission, fromPth)
+	}
+
+	// Get Latest Model Directory Name
+	models, err := ioutil.ReadDir(sch.ModelOutputDir)
+	if err != nil {
+		return sch.selectPathRandom(s, hasRetransmission, hasStreamRetransmission, fromPth)
+	}
+	var modelNames []string
+	for _, f := range models {
+		fileName := f.Name()
+		if strings.Contains(fileName, "model_") {
+			modelNames = append(modelNames, fileName)
 		}
 	}
-	return nil
+	if modelNames == nil {
+		return sch.selectPathRandom(s, hasRetransmission, hasStreamRetransmission, fromPth)
+	}
+	sort.Strings(modelNames)
+
+	latestModel := modelNames[len(modelNames)-1]
+
+	// Load Model
+	savedModel, err := tf.LoadSavedModel(filepath.Join(sch.ModelOutputDir, latestModel), []string{}, nil)
+	if err != nil {
+		panic("Enable to read the saved model" + err.Error())
+	}
+	defer savedModel.Session.Close()
+
+	//Features
+	cwndBest := float64(bestPath.sentPacketHandler.GetCongestionWindow())
+	cwndSecond := float64(secondBestPath.sentPacketHandler.GetCongestionWindow())
+	inflightf := float64(bestPath.sentPacketHandler.GetBytesInFlight())
+	inflights := float64(secondBestPath.sentPacketHandler.GetBytesInFlight())
+	llowerRTT := bestPath.rttStats.LatestRTT()
+	lsecondLowerRTT := secondBestPath.rttStats.LatestRTT()
+	tensor, _ := tf.NewTensor([]float64{cwndBest, cwndSecond, inflightf, inflights, float64(llowerRTT),
+		float64(lsecondLowerRTT), float64(bestPath.rttStats.SmoothedRTT()), float64(secondBestPath.rttStats.SmoothedRTT())})
+
+	result, err := savedModel.Session.Run(
+		map[tf.Output]*tf.Tensor{
+			savedModel.Graph.Operation("input").Output(0): tensor, // Replace this with your input layer name
+		},
+		[]tf.Output{
+			savedModel.Graph.Operation("output/Sigmoid").Output(0), // Replace this with your output layer name
+		},
+		nil,
+	)
+	pred := result[0].Value()
+	fmt.Printf("Debug prediction: %v", pred)
+
+	return sch.selectPathRoundRobin(s, hasRetransmission, hasStreamRetransmission, fromPth)
 }
 
 func (sch *scheduler) selectPathLowLatency(s *session, hasRetransmission bool, hasStreamRetransmission bool, fromPth *path) *path {

@@ -19,6 +19,7 @@ require (
 	github.com/patrikeh/go-deep v0.0.0-20191210195838-b811ffc4083e // indirect
 	github.com/stretchr/objx v0.3.0 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect
+	github.com/tensorflow/tensorflow v2.4.1+incompatible // indirect
 	github.com/tinylib/msgp v1.1.5 // indirect
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/net v0.0.0-20201021035429-f5854403a974
