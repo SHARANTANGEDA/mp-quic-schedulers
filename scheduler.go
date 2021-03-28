@@ -271,9 +271,9 @@ func (sch *scheduler) selectPathNeuralNet(s *session, hasRetransmission bool, ha
 	}
 
 	////Log Path Id w/ Interface Name
-	//for pathId, pth := range s.paths {
-	//	fmt.Printf("Path Id: %d, Local Addr: %s, Remote Addr: %s \t", pathId, pth.conn.LocalAddr(), pth.conn.RemoteAddr())
-	//}
+	for pathId, pth := range s.paths {
+		fmt.Printf("Path Id: %d, Local Addr: %s, Remote Addr: %s \t", pathId, pth.conn.LocalAddr(), pth.conn.RemoteAddr())
+	}
 
 	// XXX Avoid using PathID 0 if there is more than 1 path
 	if len(s.paths) <= 1 {
