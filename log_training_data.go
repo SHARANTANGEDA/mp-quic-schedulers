@@ -12,8 +12,12 @@ import (
 func (sch *scheduler) startTraining(s *session) {
 	fmt.Println("Started Training Task Scheduler")
 	cmd := exec.Command("python3", "./neural_net/task_executor.py")
+	if err := cmd.Run(); err != nil {
+		fmt.Println("Error in script execution: ", err)
+	}
 	cmd.Stderr = os.Stderr
 	s.TrainingProcess = cmd.Process
+	fmt.Println(s.TrainingProcess, "Check training process", s.TrainingProcess.Pid)
 }
 
 func (sch *scheduler) logTrainingData(s *session, selectedPath *path, trainingFile string) {

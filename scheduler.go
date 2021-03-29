@@ -86,7 +86,6 @@ type scheduler struct {
 	OnlineTrainingFile  string
 	ModelOutputDir      string
 	ShouldStartTraining bool
-	TrainingProcess     *os.Process
 
 	WriteHeaderColumn bool
 
