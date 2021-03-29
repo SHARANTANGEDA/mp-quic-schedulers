@@ -327,7 +327,6 @@ func (s *session) run() error {
 	aeadChanged := s.aeadChanged
 
 	var timerPth *path
-	defer s.TrainingProcess.Kill()
 
 runLoop:
 	for {
@@ -448,6 +447,9 @@ runLoop:
 	if !s.handshakeComplete {
 		s.handshakeCompleteChan <- closeErr.err
 		s.handshakeChan <- handshakeEvent{err: closeErr.err}
+	}
+	if s.TrainingProcess != nil {
+		defer s.TrainingProcess.Kill()
 	}
 	s.handleCloseError(closeErr)
 	defer s.ctxCancel()
