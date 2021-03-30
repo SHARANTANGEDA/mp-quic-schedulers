@@ -11,14 +11,14 @@ import (
 
 func (sch *scheduler) startTraining(s *session) {
 	fmt.Println("Started Training Task Scheduler")
-	cmd := exec.Command("python3", "ls -lrth")
+	cmd := exec.Command("/bin/bash", "-c", "ls", "-lrth")
 	if err := cmd.Run(); err != nil {
-		fmt.Println("Error in script execution: ", err)
+		fmt.Println("Error in script execution: ", err.Error())
 	}
 	fmt.Println(cmd.Stdout)
-	cmd = exec.Command("python3", "./neural_net/task_executor.py")
+	cmd = exec.Command("/bin/bash", "python3", "./neural_net/task_executor.py")
 	if err := cmd.Run(); err != nil {
-		fmt.Println("Error in script execution: ", err)
+		fmt.Println("Error in script execution: ", err.Error())
 	}
 	cmd.Stderr = os.Stderr
 	s.TrainingProcess = cmd.Process
