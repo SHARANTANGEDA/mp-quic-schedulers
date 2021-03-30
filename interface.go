@@ -135,7 +135,7 @@ type Config struct {
 	// Neural Network Specific Config
 	OnlineTrainingFile  string
 	ModelOutputDir      string
-	shouldStartTraining bool
+	ShouldStartTraining bool
 }
 
 // A Listener for incoming QUIC connections

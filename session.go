@@ -219,7 +219,7 @@ func (s *session) setup(
 		DumpExp:             s.config.DumpExperiences,
 		OnlineTrainingFile:  s.config.OnlineTrainingFile,
 		ModelOutputDir:      s.config.ModelOutputDir,
-		ShouldStartTraining: s.config.shouldStartTraining,
+		ShouldStartTraining: s.config.ShouldStartTraining,
 	}
 	s.scheduler.setup()
 
