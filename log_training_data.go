@@ -12,9 +12,9 @@ import (
 func (sch *scheduler) startTraining(s *session) {
 	fmt.Println("Started Training Task Scheduler")
 	cmd := exec.Command("/bin/bash", "-c", "ls", "-lrth")
-	if err := cmd.Run(); err != nil {
-		fmt.Println("Error in script execution: ", err.Error())
-	}
+	//if err := cmd.Run(); err != nil {
+	//	fmt.Println("Error in script execution: ", err.Error())
+	//}
 	out, err := cmd.Output()
 	if err != nil {
 		fmt.Println("Error in script output fetch: ", err.Error())
@@ -23,10 +23,6 @@ func (sch *scheduler) startTraining(s *session) {
 	cmd = exec.Command("/bin/bash", "python3", "./neural_net/task_executor.py")
 	if err := cmd.Run(); err != nil {
 		fmt.Println("Error in script execution: ", err.Error())
-	}
-	out, err = cmd.Output()
-	if err != nil {
-		fmt.Println("Error in script output fetch: ", err.Error())
 	}
 	fmt.Println("Output:", out)
 	cmd.Stderr = os.Stderr
