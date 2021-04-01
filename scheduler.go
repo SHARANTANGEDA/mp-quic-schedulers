@@ -12,7 +12,8 @@ import (
 	"time"
 
 	"github.com/Workiva/go-datastructures/queue"
-	tf "github.com/tensorflow/tensorflow/tensorflow/go"
+	tf "github.com/galeone/tensorflow/tensorflow/go"
+	tg "github.com/galeone/tfgo"
 	"gonum.org/v1/gonum/mat"
 
 	"github.com/SHARANTANGEDA/gorl/agents"
@@ -368,11 +369,7 @@ pathLoop:
 	fmt.Println("Latest Model:", latestModel)
 
 	// Load Model
-	savedModel, err := tf.LoadSavedModel(filepath.Join(sch.ModelOutputDir, latestModel), []string{}, nil)
-	if err != nil {
-		panic("Enable to read the saved model" + err.Error())
-	}
-	defer savedModel.Session.Close()
+	savedModel := tg.LoadModel(filepath.Join(sch.ModelOutputDir, latestModel), []string{"serve"}, nil)
 
 	//Features
 	cwndBest := float64(bestPath.sentPacketHandler.GetCongestionWindow())
@@ -384,15 +381,11 @@ pathLoop:
 	tensor, _ := tf.NewTensor([]float64{cwndBest, cwndSecond, inflightf, inflights, float64(llowerRTT),
 		float64(lsecondLowerRTT), float64(bestPath.rttStats.SmoothedRTT()), float64(secondBestPath.rttStats.SmoothedRTT())})
 
-	result, err := savedModel.Session.Run(
-		map[tf.Output]*tf.Tensor{
-			savedModel.Graph.Operation("input").Output(0): tensor, // Replace this with your input layer name
-		},
-		[]tf.Output{
-			savedModel.Graph.Operation("output/Sigmoid").Output(0), // Replace this with your output layer name
-		},
-		nil,
-	)
+	result := savedModel.Exec([]tf.Output{
+		savedModel.Op("output/Sigmoid", 0),
+	}, map[tf.Output]*tf.Tensor{
+		savedModel.Op("input", 0): tensor,
+	})
 	pred := result[0].Value()
 	fmt.Printf("Debug prediction: %v", pred)
 

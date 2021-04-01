@@ -7,6 +7,7 @@ require (
 	github.com/Workiva/go-datastructures v1.0.52
 	github.com/bifurcation/mint v0.0.0-20171208133358-a6080d464fb5
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/galeone/tfgo v0.0.0-20210204182614-84b9a5e77f79 // indirect
 	github.com/golang/mock v1.4.4
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/kr/pretty v0.1.0 // indirect
@@ -17,7 +18,6 @@ require (
 	github.com/onsi/ginkgo v1.14.0
 	github.com/onsi/gomega v1.10.1
 	github.com/stretchr/testify v1.7.0 // indirect
-	github.com/tensorflow/tensorflow v1.15.0
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/net v0.0.0-20201021035429-f5854403a974
 	golang.org/x/sys v0.0.0-20201231184435-2d18734c6014 // indirect
