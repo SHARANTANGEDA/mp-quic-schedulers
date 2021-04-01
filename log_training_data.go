@@ -11,20 +11,15 @@ import (
 
 func (sch *scheduler) startTraining(s *session) {
 	fmt.Println("Started Training Task Scheduler")
-	cmd := exec.Command("/bin/bash", "-c", "ls", "-lrth")
-	//if err := cmd.Run(); err != nil {
-	//	fmt.Println("Error in script execution: ", err.Error())
-	//}
-	out, err := cmd.Output()
-	if err != nil {
-		fmt.Println("Error in script output fetch: ", err.Error())
-	}
-	fmt.Println("Output:", out)
-	cmd = exec.Command("/bin/bash", "python3", "./neural_net/task_executor.py")
+	trainCmd := fmt.Sprintf("from mpquic_schedulers import neural_net; neural_net.train_update_model('%s', %d, '%s')",
+		sch.OnlineTrainingFile, sch.trainingEpochs, sch.ModelOutputDir)
+
+	fmt.Println(trainCmd)
+	cmd := exec.Command(sch.pythonEnv, "-c", trainCmd)
+
 	if err := cmd.Run(); err != nil {
 		fmt.Println("Error in script execution: ", err.Error())
 	}
-	fmt.Println("Output:", out)
 	cmd.Stderr = os.Stderr
 	s.TrainingProcess = cmd.Process
 	fmt.Println(s.TrainingProcess, "Check training process", s.TrainingProcess.Pid)
