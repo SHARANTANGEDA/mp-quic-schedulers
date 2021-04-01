@@ -365,6 +365,7 @@ pathLoop:
 	sort.Strings(modelNames)
 
 	latestModel := modelNames[len(modelNames)-1]
+	fmt.Println("Latest Model:", latestModel)
 
 	// Load Model
 	savedModel, err := tf.LoadSavedModel(filepath.Join(sch.ModelOutputDir, latestModel), []string{}, nil)
