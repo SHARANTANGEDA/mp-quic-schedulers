@@ -382,9 +382,9 @@ pathLoop:
 		float64(lsecondLowerRTT), float64(bestPath.rttStats.SmoothedRTT()), float64(secondBestPath.rttStats.SmoothedRTT())})
 
 	result := savedModel.Exec([]tf.Output{
-		savedModel.Op("output/Sigmoid", 0),
+		savedModel.Op("StatefulPartitionedCall", 0),
 	}, map[tf.Output]*tf.Tensor{
-		savedModel.Op("input", 0): tensor,
+		savedModel.Op("serving_default_input_input", 0): tensor,
 	})
 	pred := result[0].Value()
 	fmt.Printf("Debug prediction: %v", pred)
