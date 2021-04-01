@@ -30,7 +30,7 @@ func (s *server) startTraining() {
 func (sch *scheduler) logTrainingData(s *session, selectedPath *path, trainingFile string) {
 
 	var secondBestPath *path
-	if selectedPath == nil {
+	if selectedPath == nil || selectedPath.pathID == protocol.InitialPathID {
 		return
 	}
 	for pathID, pth := range s.paths {
