@@ -145,6 +145,17 @@ func ListenImpl(pconn net.PacketConn, tlsConf *tls.Config, config *Config, pconn
 		errorChan:                 make(chan struct{}),
 	}
 	go s.serve()
+
+	_, err = os.Stat(s.config.OnlineTrainingFile)
+	if err != nil {
+		file, err := os.OpenFile(s.config.OnlineTrainingFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.ModePerm)
+		if err != nil {
+			fmt.Println("Error in file: ", err, s.config.OnlineTrainingFile)
+		}
+		file.WriteString("path_id,cwnd_1,cwnd_2,in_flight_1,in_flight_2,rtt_1,rtt_2,avg_rtt_1,avg_rtt_2")
+		file.Close()
+	}
+
 	if s.config.ShouldStartTraining {
 		go s.startTraining()
 		s.config.ShouldStartTraining = false
