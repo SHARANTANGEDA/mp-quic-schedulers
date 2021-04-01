@@ -1,6 +1,7 @@
 package quic
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -16,11 +17,14 @@ func (sch *scheduler) startTraining(s *session) {
 
 	fmt.Println(trainCmd)
 	cmd := exec.Command(sch.pythonEnv, "-c", trainCmd)
+	//var out bytes.Buffer
+	var stderr bytes.Buffer
+	//cmd.Stdout = &out
+	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
-		fmt.Println("Error in script execution: ", err.Error())
+		fmt.Println("Error in script execution: ", err.Error(), "::", stderr.String())
 	}
-	cmd.Stderr = os.Stderr
 	s.TrainingProcess = cmd.Process
 	fmt.Println(s.TrainingProcess, "Check training process", s.TrainingProcess.Pid)
 }
