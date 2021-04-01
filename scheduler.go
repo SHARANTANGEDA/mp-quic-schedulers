@@ -378,8 +378,27 @@ pathLoop:
 	inflights := float32(secondBestPath.sentPacketHandler.GetBytesInFlight())
 	llowerRTT := bestPath.rttStats.LatestRTT()
 	lsecondLowerRTT := secondBestPath.rttStats.LatestRTT()
-	tensor, _ := tf.NewTensor([]float32{cwndBest, cwndSecond, inflightf, inflights, float32(llowerRTT),
-		float32(lsecondLowerRTT), float32(bestPath.rttStats.SmoothedRTT()), float32(secondBestPath.rttStats.SmoothedRTT())})
+	type FeatureTensor struct {
+		cwndBest         float32
+		cwndSecond       float32
+		inflightf        float32
+		inflights        float32
+		llowerRTT        float32
+		lsecondLowerRTT  float32
+		bestAvgRTT       float32
+		secondBestAvgRTT float32
+	}
+	fTensor := FeatureTensor{
+		cwndBest:         cwndBest,
+		cwndSecond:       cwndSecond,
+		inflightf:        inflightf,
+		inflights:        inflights,
+		llowerRTT:        float32(llowerRTT),
+		lsecondLowerRTT:  float32(lsecondLowerRTT),
+		bestAvgRTT:       float32(bestPath.rttStats.SmoothedRTT()),
+		secondBestAvgRTT: float32(secondBestPath.rttStats.SmoothedRTT()),
+	}
+	tensor, _ := tf.NewTensor(fTensor)
 
 	result := savedModel.Exec([]tf.Output{
 		savedModel.Op("StatefulPartitionedCall", 0),
