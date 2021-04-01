@@ -379,24 +379,24 @@ pathLoop:
 	llowerRTT := bestPath.rttStats.LatestRTT()
 	lsecondLowerRTT := secondBestPath.rttStats.LatestRTT()
 	type FeatureTensor struct {
-		cwndBest         float32
-		cwndSecond       float32
-		inflightf        float32
-		inflights        float32
-		llowerRTT        float32
-		lsecondLowerRTT  float32
-		bestAvgRTT       float32
-		secondBestAvgRTT float32
+		cwndBest         []float32
+		cwndSecond       []float32
+		inflightf        []float32
+		inflights        []float32
+		llowerRTT        []float32
+		lsecondLowerRTT  []float32
+		bestAvgRTT       []float32
+		secondBestAvgRTT []float32
 	}
-	fTensor := FeatureTensor{
-		cwndBest:         cwndBest,
-		cwndSecond:       cwndSecond,
-		inflightf:        inflightf,
-		inflights:        inflights,
-		llowerRTT:        float32(llowerRTT),
-		lsecondLowerRTT:  float32(lsecondLowerRTT),
-		bestAvgRTT:       float32(bestPath.rttStats.SmoothedRTT()),
-		secondBestAvgRTT: float32(secondBestPath.rttStats.SmoothedRTT()),
+	fTensor := &FeatureTensor{
+		cwndBest:         []float32{cwndBest},
+		cwndSecond:       []float32{cwndSecond},
+		inflightf:        []float32{inflightf},
+		inflights:        []float32{inflights},
+		llowerRTT:        []float32{float32(llowerRTT)},
+		lsecondLowerRTT:  []float32{float32(lsecondLowerRTT)},
+		bestAvgRTT:       []float32{float32(bestPath.rttStats.SmoothedRTT())},
+		secondBestAvgRTT: []float32{float32(secondBestPath.rttStats.SmoothedRTT())},
 	}
 	tensor, _ := tf.NewTensor(fTensor)
 
