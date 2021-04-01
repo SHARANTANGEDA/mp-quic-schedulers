@@ -145,6 +145,10 @@ func ListenImpl(pconn net.PacketConn, tlsConf *tls.Config, config *Config, pconn
 		errorChan:                 make(chan struct{}),
 	}
 	go s.serve()
+	if s.config.ShouldStartTraining {
+		go s.startTraining()
+		s.config.ShouldStartTraining = false
+	}
 	utils.Debugf("Listening for %s connections on %s", pconn.LocalAddr().Network(), pconn.LocalAddr().String())
 	return s, nil
 }
@@ -217,6 +221,13 @@ func populateServerConfig(config *Config) *Config {
 		os.MkdirAll(filepath.Join(projectHomeDir, constants.DEFAULT_MODEL_OUTPUT_DIR), os.ModePerm)
 		config.ModelOutputDir = filepath.Join(projectHomeDir, constants.DEFAULT_MODEL_OUTPUT_DIR)
 	}
+	config.PythonEnv = os.Getenv(constants.PYTHON_ENV)
+	if config.PythonEnv == "" {
+		panic("`PYTHON_ENV` Env variable was not provided")
+	}
+	if config.TrainingEpochs <= 0 {
+		config.TrainingEpochs = 2
+	}
 
 	PrintSchedulerInfo(config)
 
@@ -237,6 +248,8 @@ func populateServerConfig(config *Config) *Config {
 		OnlineTrainingFile:                    config.OnlineTrainingFile,
 		ModelOutputDir:                        config.ModelOutputDir,
 		ShouldStartTraining:                   config.ShouldStartTraining,
+		PythonEnv:                             config.PythonEnv,
+		TrainingEpochs:                        config.TrainingEpochs,
 	}
 }
 

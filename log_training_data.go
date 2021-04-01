@@ -10,13 +10,13 @@ import (
 	"github.com/SHARANTANGEDA/mp-quic/internal/protocol"
 )
 
-func (sch *scheduler) startTraining(s *session) {
+func (s *server) startTraining() {
 	fmt.Println("Started Training Task Scheduler")
 	trainCmd := fmt.Sprintf("from mpquic_schedulers import neural_net; neural_net.train_update_model('%s', %d, '%s')",
-		sch.OnlineTrainingFile, sch.trainingEpochs, sch.ModelOutputDir)
+		s.config.OnlineTrainingFile, s.config.TrainingEpochs, s.config.ModelOutputDir)
 
 	fmt.Println(trainCmd)
-	cmd := exec.Command(sch.pythonEnv, "-c", trainCmd)
+	cmd := exec.Command(s.config.PythonEnv, "-c", trainCmd)
 	//var out bytes.Buffer
 	var stderr bytes.Buffer
 	//cmd.Stdout = &out
@@ -25,8 +25,7 @@ func (sch *scheduler) startTraining(s *session) {
 	if err := cmd.Run(); err != nil {
 		fmt.Println("Error in script execution: ", err.Error(), "::", stderr.String())
 	}
-	s.TrainingProcess = cmd.Process
-	fmt.Println(s.TrainingProcess, "Check training process", s.TrainingProcess.Pid)
+	fmt.Println("Training Started at process Id:", cmd.Process.Pid)
 }
 
 func (sch *scheduler) logTrainingData(s *session, selectedPath *path, trainingFile string) {
@@ -60,6 +59,7 @@ func (sch *scheduler) logTrainingData(s *session, selectedPath *path, trainingFi
 
 	_, err := os.Stat(trainingFile)
 	if err != nil {
+		fmt.Println("Training file:", err.Error())
 		sch.WriteHeaderColumn = true
 	} else {
 		sch.WriteHeaderColumn = false
@@ -78,9 +78,4 @@ func (sch *scheduler) logTrainingData(s *session, selectedPath *path, trainingFi
 			inflightFirst, inflightSecond, bestPathRTT, secondBestPathRTT, firstPathAvgRTT, secondPathAvgRTT))
 	}
 	_ = file.Close()
-
-	if sch.ShouldStartTraining {
-		go sch.startTraining(s)
-		sch.ShouldStartTraining = false
-	}
 }

@@ -81,13 +81,11 @@ type scheduler struct {
 
 	// Project Home Directory
 	projectHomeDir string
-	pythonEnv      string
 
 	// Neural Net Directory
 	OnlineTrainingFile  string
 	ModelOutputDir      string
 	ShouldStartTraining bool
-	trainingEpochs      int
 
 	WriteHeaderColumn bool
 
@@ -105,11 +103,6 @@ func (sch *scheduler) setup() {
 	if sch.projectHomeDir == "" {
 		panic("`PROJECT_HOME_DIR` Env variable was not provided")
 	}
-	sch.pythonEnv = os.Getenv(constants.PYTHON_ENV)
-	if sch.pythonEnv == "" {
-		panic("`PYTHON_ENV` Env variable was not provided")
-	}
-	sch.trainingEpochs = 2
 
 	sch.quotas = make(map[protocol.PathID]uint)
 	sch.retrans = make(map[protocol.PathID]uint64)

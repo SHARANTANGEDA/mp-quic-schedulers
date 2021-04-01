@@ -136,6 +136,8 @@ type Config struct {
 	OnlineTrainingFile  string
 	ModelOutputDir      string
 	ShouldStartTraining bool
+	TrainingEpochs      int
+	PythonEnv           string
 }
 
 // A Listener for incoming QUIC connections
