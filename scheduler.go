@@ -369,6 +369,10 @@ pathLoop:
 	fmt.Println("Latest Model:", latestModel)
 
 	// Load Model
+	_, err = tf.LoadSavedModel(filepath.Join(sch.ModelOutputDir, latestModel), []string{"serve"}, nil)
+	if err != nil {
+		return sch.selectPathRoundRobin(s, hasRetransmission, hasStreamRetransmission, fromPth)
+	}
 	savedModel := tg.LoadModel(filepath.Join(sch.ModelOutputDir, latestModel), []string{"serve"}, nil)
 
 	//Features
