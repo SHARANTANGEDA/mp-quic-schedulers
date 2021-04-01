@@ -221,6 +221,7 @@ func (s *session) setup(
 		ModelOutputDir:      s.config.ModelOutputDir,
 		ShouldStartTraining: s.config.ShouldStartTraining,
 	}
+	s.config.ShouldStartTraining = false
 	s.scheduler.setup()
 
 	if pconnMgr == nil && conn != nil {
@@ -448,9 +449,9 @@ runLoop:
 		s.handshakeCompleteChan <- closeErr.err
 		s.handshakeChan <- handshakeEvent{err: closeErr.err}
 	}
-	if s.TrainingProcess != nil {
-		defer s.TrainingProcess.Kill()
-	}
+	//if s.TrainingProcess != nil {
+	//	defer s.TrainingProcess.Kill()
+	//}
 	s.handleCloseError(closeErr)
 	defer s.ctxCancel()
 	return closeErr.err
