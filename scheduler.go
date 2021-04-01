@@ -388,7 +388,7 @@ pathLoop:
 		bestAvgRTT       []float32
 		secondBestAvgRTT []float32
 	}
-	fTensor := &FeatureTensor{
+	tensor, _ := tf.NewTensor(FeatureTensor{
 		cwndBest:         []float32{cwndBest},
 		cwndSecond:       []float32{cwndSecond},
 		inflightf:        []float32{inflightf},
@@ -397,8 +397,7 @@ pathLoop:
 		lsecondLowerRTT:  []float32{float32(lsecondLowerRTT)},
 		bestAvgRTT:       []float32{float32(bestPath.rttStats.SmoothedRTT())},
 		secondBestAvgRTT: []float32{float32(secondBestPath.rttStats.SmoothedRTT())},
-	}
-	tensor, _ := tf.NewTensor(fTensor)
+	})
 
 	result := savedModel.Exec([]tf.Output{
 		savedModel.Op("StatefulPartitionedCall", 0),
