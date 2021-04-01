@@ -7,7 +7,8 @@ require (
 	github.com/Workiva/go-datastructures v1.0.52
 	github.com/bifurcation/mint v0.0.0-20171208133358-a6080d464fb5
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/galeone/tfgo v0.0.0-20210204182614-84b9a5e77f79 // indirect
+	github.com/galeone/tensorflow v2.4.0-rc0.0.20210202175351-640a390c2283+incompatible
+	github.com/galeone/tfgo v0.0.0-20210204182614-84b9a5e77f79
 	github.com/golang/mock v1.4.4
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/kr/pretty v0.1.0 // indirect
