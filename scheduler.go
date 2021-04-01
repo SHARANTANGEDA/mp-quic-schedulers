@@ -372,14 +372,14 @@ pathLoop:
 	savedModel := tg.LoadModel(filepath.Join(sch.ModelOutputDir, latestModel), []string{"serve"}, nil)
 
 	//Features
-	cwndBest := float64(bestPath.sentPacketHandler.GetCongestionWindow())
-	cwndSecond := float64(secondBestPath.sentPacketHandler.GetCongestionWindow())
-	inflightf := float64(bestPath.sentPacketHandler.GetBytesInFlight())
-	inflights := float64(secondBestPath.sentPacketHandler.GetBytesInFlight())
+	cwndBest := float32(bestPath.sentPacketHandler.GetCongestionWindow())
+	cwndSecond := float32(secondBestPath.sentPacketHandler.GetCongestionWindow())
+	inflightf := float32(bestPath.sentPacketHandler.GetBytesInFlight())
+	inflights := float32(secondBestPath.sentPacketHandler.GetBytesInFlight())
 	llowerRTT := bestPath.rttStats.LatestRTT()
 	lsecondLowerRTT := secondBestPath.rttStats.LatestRTT()
-	tensor, _ := tf.NewTensor([]float64{cwndBest, cwndSecond, inflightf, inflights, float64(llowerRTT),
-		float64(lsecondLowerRTT), float64(bestPath.rttStats.SmoothedRTT()), float64(secondBestPath.rttStats.SmoothedRTT())})
+	tensor, _ := tf.NewTensor([]float32{cwndBest, cwndSecond, inflightf, inflights, float32(llowerRTT),
+		float32(lsecondLowerRTT), float32(bestPath.rttStats.SmoothedRTT()), float32(secondBestPath.rttStats.SmoothedRTT())})
 
 	result := savedModel.Exec([]tf.Output{
 		savedModel.Op("StatefulPartitionedCall", 0),
