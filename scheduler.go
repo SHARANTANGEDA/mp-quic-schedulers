@@ -100,6 +100,10 @@ type queuePathIdItem struct {
 }
 
 func (sch *scheduler) setup() {
+	err := os.Setenv("TF_CPP_MIN_LOG_LEVEL", "2")
+	if err != nil {
+		fmt.Println("TF Environment Error:", err.Error())
+	}
 	sch.projectHomeDir = os.Getenv(constants.PROJECT_HOME_DIR)
 	if sch.projectHomeDir == "" {
 		panic("`PROJECT_HOME_DIR` Env variable was not provided")
@@ -382,26 +386,6 @@ pathLoop:
 	inflights := float32(secondBestPath.sentPacketHandler.GetBytesInFlight())
 	llowerRTT := bestPath.rttStats.LatestRTT()
 	lsecondLowerRTT := secondBestPath.rttStats.LatestRTT()
-	//type FeatureTensor struct {
-	//	cwndBest         []float32
-	//	cwndSecond       []float32
-	//	inflightf        []float32
-	//	inflights        []float32
-	//	llowerRTT        []float32
-	//	lsecondLowerRTT  []float32
-	//	bestAvgRTT       []float32
-	//	secondBestAvgRTT []float32
-	//}
-	//tensor, _ := tf.NewTensor(FeatureTensor{
-	//	cwndBest:         []float32{cwndBest},
-	//	cwndSecond:       []float32{cwndSecond},
-	//	inflightf:        []float32{inflightf},
-	//	inflights:        []float32{inflights},
-	//	llowerRTT:        []float32{float32(llowerRTT)},
-	//	lsecondLowerRTT:  []float32{float32(lsecondLowerRTT)},
-	//	bestAvgRTT:       []float32{float32(bestPath.rttStats.SmoothedRTT())},
-	//	secondBestAvgRTT: []float32{float32(secondBestPath.rttStats.SmoothedRTT())},
-	//})
 	input, _ := tf.NewTensor([1][8]float32{{cwndBest, cwndSecond, inflightf, inflights, float32(llowerRTT),
 		float32(lsecondLowerRTT), float32(bestPath.rttStats.SmoothedRTT()), float32(secondBestPath.rttStats.SmoothedRTT())}})
 
