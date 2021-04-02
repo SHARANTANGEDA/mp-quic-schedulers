@@ -135,6 +135,14 @@ type Config struct {
 	// Neural Network Specific Config
 	OnlineTrainingFile string
 	ModelOutputDir     string
+
+	// Bandwidths, Latency & Packet Losses for both Paths
+	Bandwidth1  float32
+	Bandwidth2  float32
+	Latency1    float32
+	Latency2    float32
+	PacketLoss1 float32
+	PacketLoss2 float32
 }
 
 // A Listener for incoming QUIC connections

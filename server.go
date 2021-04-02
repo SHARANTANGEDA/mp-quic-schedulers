@@ -218,6 +218,10 @@ func populateServerConfig(config *Config) *Config {
 		config.ModelOutputDir = filepath.Join(projectHomeDir, constants.DEFAULT_MODEL_OUTPUT_DIR)
 	}
 
+	if config.Scheduler == constants.SCHEDULER_OPTIMUM_SPLIT && (config.Bandwidth1 == 0 || config.Bandwidth2 == 0) {
+		panic("Network Parameters are not provided or Bandwidth Values were set to 0")
+	}
+
 	PrintSchedulerInfo(config)
 
 	return &Config{
@@ -236,6 +240,12 @@ func populateServerConfig(config *Config) *Config {
 		DumpExperiences:                       config.DumpExperiences,
 		OnlineTrainingFile:                    config.OnlineTrainingFile,
 		ModelOutputDir:                        config.ModelOutputDir,
+		Bandwidth1:                            config.Bandwidth1,
+		Bandwidth2:                            config.Bandwidth2,
+		Latency1:                              config.Latency1,
+		Latency2:                              config.Latency2,
+		PacketLoss1:                           config.PacketLoss1,
+		PacketLoss2:                           config.PacketLoss2,
 	}
 }
 

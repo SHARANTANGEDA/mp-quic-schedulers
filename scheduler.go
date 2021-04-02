@@ -89,6 +89,11 @@ type scheduler struct {
 
 	// pathID Queue for Round Robin
 	pathQueue queue.Queue
+
+	// Optimum Split Scheduler
+	path1Quota int
+	path2Quota int
+	SplitRatio float32
 }
 
 type queuePathIdItem struct {
@@ -109,6 +114,8 @@ func (sch *scheduler) setup() {
 	sch.quotas = make(map[protocol.PathID]uint)
 	sch.retrans = make(map[protocol.PathID]uint64)
 	sch.waiting = 0
+	sch.path1Quota = 0
+	sch.path2Quota = 0
 
 	//Read lin to buffer
 	linFileName := sch.projectHomeDir + "/sch_out/lin"
@@ -147,6 +154,25 @@ func (sch *scheduler) setup() {
 			sch.Agent = GetAgent("", "")
 		}
 	}
+}
+
+func (sch *scheduler) getSplitRatioFromModel(bandwidth1 float32, latency1 float32, packetLossPercent1 float32,
+	bandwidth2 float32, latency2 float32, packetLossPercent2 float32, modelOutputDir string) float32 {
+	savedModel := tg.LoadModel(filepath.Join(modelOutputDir), []string{"serve"}, nil)
+
+	//Features
+	input, _ := tf.NewTensor([1][8]float32{{bandwidth1, bandwidth2, latency1, latency2, packetLossPercent1,
+		packetLossPercent2}})
+
+	result := savedModel.Exec([]tf.Output{
+		savedModel.Op("StatefulPartitionedCall", 0),
+	}, map[tf.Output]*tf.Tensor{
+		savedModel.Op("serving_default_input_input", 0): input,
+	})
+	pred := result[0].Value().([][]float32)
+	fmt.Printf("Debug prediction: %v", pred)
+	return pred[0][0]
+
 }
 
 func (sch *scheduler) getRetransmission(s *session) (hasRetransmission bool, retransmitPacket *ackhandler.Packet, pth *path) {
@@ -1272,6 +1298,49 @@ func (sch *scheduler) selectPathRandom(s *session, hasRetransmission bool, hasSt
 	return s.paths[availablePaths[pathID]]
 }
 
+func (sch *scheduler) selectPathOptimum(s *session, hasRetransmission bool, hasStreamRetransmission bool, fromPth *path) *path {
+	//fmt.Println("Log: ", sch.path1Quota, sch.path2Quota)
+	if len(s.paths) <= 1 {
+		if !hasRetransmission && !s.paths[protocol.InitialPathID].SendingAllowed() {
+			return nil
+		}
+		return s.paths[protocol.InitialPathID]
+	}
+	if len(s.paths) >= 4 && len(s.paths) < 3 {
+		return sch.selectBLEST(s, hasRetransmission, hasStreamRetransmission, fromPth)
+	}
+
+	if sch.SplitRatio == 1 {
+		sch.path1Quota += 1
+		return s.paths[protocol.PathID(1)]
+	} else if sch.SplitRatio == 0 {
+		sch.path2Quota += 1
+		return s.paths[protocol.PathID(2)]
+	}
+
+	// Method of Balancing Ratios
+	if sch.path1Quota == 0 && sch.path2Quota == 0 {
+		if sch.SplitRatio > 0.5 {
+			sch.path1Quota += 1
+			return s.paths[protocol.PathID(1)]
+		} else {
+			sch.path2Quota += 1
+			return s.paths[protocol.PathID(2)]
+		}
+	}
+	if sch.path2Quota == 0 {
+		sch.path2Quota += 1
+		return s.paths[protocol.PathID(2)]
+	}
+
+	if float32(sch.path1Quota/sch.path2Quota) < sch.SplitRatio {
+		sch.path1Quota += 1
+		return s.paths[protocol.PathID(1)]
+	}
+	sch.path2Quota += 1
+	return s.paths[protocol.PathID(2)]
+}
+
 func (sch *scheduler) selectFirstPath(s *session, hasRetransmission bool, hasStreamRetransmission bool, fromPth *path) *path {
 	if len(s.paths) <= 1 {
 		if !hasRetransmission && !s.paths[protocol.InitialPathID].SendingAllowed() {
@@ -1354,6 +1423,9 @@ func (sch *scheduler) selectPath(s *session, hasRetransmission bool, hasStreamRe
 		return sch.selectPathPeek(s, hasRetransmission, hasStreamRetransmission, fromPth)
 	case constants.SCHEDULER_RANDOM:
 		return sch.selectPathRandom(s, hasRetransmission, hasStreamRetransmission, fromPth)
+	case constants.SCHEDULER_OPTIMUM_SPLIT:
+		return sch.selectPathOptimum(s, hasRetransmission, hasStreamRetransmission, fromPth)
+
 	default:
 		return sch.selectPathRoundRobin(s, hasRetransmission, hasStreamRetransmission, fromPth)
 	}
