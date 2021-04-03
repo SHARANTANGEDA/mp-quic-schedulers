@@ -143,6 +143,9 @@ type Config struct {
 	Latency2    float32
 	PacketLoss1 float32
 	PacketLoss2 float32
+
+	// Temporary for testing
+	SplitRatio float32
 }
 
 // A Listener for incoming QUIC connections

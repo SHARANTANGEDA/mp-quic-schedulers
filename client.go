@@ -239,6 +239,7 @@ func populateClientConfig(config *Config) *Config {
 		Latency2:                              config.Latency2,
 		PacketLoss1:                           config.PacketLoss1,
 		PacketLoss2:                           config.PacketLoss2,
+		SplitRatio:                            config.SplitRatio,
 	}
 }
 

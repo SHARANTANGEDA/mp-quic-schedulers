@@ -216,9 +216,10 @@ func (s *session) setup(
 		DumpExp:            s.config.DumpExperiences,
 		OnlineTrainingFile: s.config.OnlineTrainingFile,
 		ModelOutputDir:     s.config.ModelOutputDir,
-		SplitRatio: s.scheduler.getSplitRatioFromModel(s.config.Bandwidth1, s.config.Latency1, s.config.PacketLoss1,
-			s.config.Bandwidth2, s.config.Latency2, s.config.PacketLoss2, s.config.ModelOutputDir),
+		SplitRatio:         s.config.SplitRatio,
 	}
+	//s.scheduler.getSplitRatioFromModel(s.config.Bandwidth1, s.config.Latency1, s.config.PacketLoss1,
+	//	s.config.Bandwidth2, s.config.Latency2, s.config.PacketLoss2, s.config.ModelOutputDir),
 	s.scheduler.setup()
 
 	if pconnMgr == nil && conn != nil {
