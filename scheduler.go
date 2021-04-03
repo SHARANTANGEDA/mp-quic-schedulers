@@ -1311,8 +1311,7 @@ func (sch *scheduler) selectPathOptimum(s *session, hasRetransmission bool, hasS
 	}
 
 	if sch.SplitRatio == 1 {
-		sch.path1Quota += 1
-		return s.paths[protocol.PathID(1)]
+		return sch.selectPathRoundRobin(s, hasRetransmission, hasStreamRetransmission, fromPth)
 	} else if sch.SplitRatio == 0 {
 		sch.path2Quota += 1
 		return s.paths[protocol.PathID(2)]
