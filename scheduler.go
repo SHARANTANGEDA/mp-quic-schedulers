@@ -1309,33 +1309,42 @@ func (sch *scheduler) selectPathOptimum(s *session, hasRetransmission bool, hasS
 	if len(s.paths) >= 4 && len(s.paths) < 3 {
 		return sch.selectBLEST(s, hasRetransmission, hasStreamRetransmission, fromPth)
 	}
+	var pathIdList []protocol.PathID
+	for pathId, _ := range s.paths {
+		if pathId != protocol.InitialPathID {
+			pathIdList = append(pathIdList, pathId)
+		}
+	}
+	if pathIdList == nil || len(pathIdList) != 2 {
+		return sch.selectBLEST(s, hasRetransmission, hasStreamRetransmission, fromPth)
+	}
 
 	if sch.SplitRatio == 0 {
 		sch.path2Quota += 1
-		return s.paths[protocol.PathID(2)]
+		return s.paths[pathIdList[0]]
 	}
 
 	// Method of Balancing Ratios
 	if sch.path1Quota == 0 && sch.path2Quota == 0 {
 		if sch.SplitRatio > 0.5 {
 			sch.path1Quota += 1
-			return s.paths[protocol.PathID(1)]
+			return s.paths[pathIdList[0]]
 		} else {
 			sch.path2Quota += 1
-			return s.paths[protocol.PathID(2)]
+			return s.paths[pathIdList[1]]
 		}
 	}
 	if sch.path2Quota == 0 {
 		sch.path2Quota += 1
-		return s.paths[protocol.PathID(2)]
+		return s.paths[pathIdList[1]]
 	}
 
 	if float32(sch.path1Quota/sch.path2Quota) < sch.SplitRatio {
 		sch.path1Quota += 1
-		return s.paths[protocol.PathID(1)]
+		return s.paths[pathIdList[0]]
 	}
 	sch.path2Quota += 1
-	return s.paths[protocol.PathID(2)]
+	return s.paths[pathIdList[1]]
 }
 
 func (sch *scheduler) selectFirstPath(s *session, hasRetransmission bool, hasStreamRetransmission bool, fromPth *path) *path {
