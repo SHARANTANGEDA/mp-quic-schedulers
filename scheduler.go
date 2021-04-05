@@ -1710,7 +1710,8 @@ func PrintSchedulerInfo(config *Config) {
 	// Scheduler Info
 	schedulerList := []string{constants.SCHEDULER_ROUND_ROBIN, constants.SCHEDULER_LOW_LATENCY,
 		constants.SCHEDULER_PEEKABOO, constants.SCHEDULER_ECF, constants.SCHEDULER_DQNA, constants.SCHEDULER_BLEST,
-		constants.SCHEDULER_FIRST_PATH, constants.SCHEDULER_LOW_BANDIT, constants.SCHEDULER_RANDOM}
+		constants.SCHEDULER_FIRST_PATH, constants.SCHEDULER_LOW_BANDIT, constants.SCHEDULER_RANDOM,
+		constants.SCHEDULER_OPTIMUM_SPLIT}
 	if config.Scheduler == "" {
 		fmt.Println("Using Default Multipath Scheduler: ", constants.SCHEDULER_ROUND_ROBIN)
 	} else if util.StringInSlice(schedulerList, config.Scheduler) {
