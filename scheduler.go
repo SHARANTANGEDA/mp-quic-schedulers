@@ -1320,31 +1320,86 @@ func (sch *scheduler) selectPathOptimum(s *session, hasRetransmission bool, hasS
 	}
 
 	if sch.SplitRatio == 0 {
-		sch.path2Quota += 1
-		return s.paths[pathIdList[0]]
+		if s.paths[pathIdList[1]].SendingAllowed() {
+			sch.path2Quota += 1
+			return s.paths[pathIdList[1]]
+		} else {
+			if s.paths[pathIdList[0]].SendingAllowed() {
+				sch.path1Quota += 1
+				return s.paths[pathIdList[0]]
+			} else {
+				return nil
+			}
+		}
 	}
 
 	// Method of Balancing Ratios
 	if sch.path1Quota == 0 && sch.path2Quota == 0 {
 		if sch.SplitRatio > 0.5 {
-			sch.path1Quota += 1
-			return s.paths[pathIdList[0]]
+			if s.paths[pathIdList[0]].SendingAllowed() {
+				sch.path1Quota += 1
+				return s.paths[pathIdList[0]]
+			} else {
+				if s.paths[pathIdList[1]].SendingAllowed() {
+					sch.path2Quota += 1
+					return s.paths[pathIdList[1]]
+				} else {
+					return nil
+				}
+			}
 		} else {
-			sch.path2Quota += 1
-			return s.paths[pathIdList[1]]
+			if s.paths[pathIdList[1]].SendingAllowed() {
+				sch.path2Quota += 1
+				return s.paths[pathIdList[1]]
+			} else {
+				if s.paths[pathIdList[0]].SendingAllowed() {
+					sch.path1Quota += 1
+					return s.paths[pathIdList[0]]
+				} else {
+					return nil
+				}
+			}
 		}
 	}
 	if sch.path2Quota == 0 {
-		sch.path2Quota += 1
-		return s.paths[pathIdList[1]]
+		if s.paths[pathIdList[1]].SendingAllowed() {
+			sch.path2Quota += 1
+			return s.paths[pathIdList[1]]
+		} else {
+			if s.paths[pathIdList[0]].SendingAllowed() {
+				sch.path1Quota += 1
+				return s.paths[pathIdList[0]]
+			} else {
+				return nil
+			}
+		}
 	}
 
-	if float32(sch.path1Quota/sch.path2Quota) < sch.SplitRatio {
-		sch.path1Quota += 1
-		return s.paths[pathIdList[0]]
+	if sch.path2Quota != 0 && (float32(sch.path1Quota/sch.path2Quota) < sch.SplitRatio) {
+		if s.paths[pathIdList[0]].SendingAllowed() {
+			sch.path1Quota += 1
+			return s.paths[pathIdList[0]]
+		} else {
+			if s.paths[pathIdList[1]].SendingAllowed() {
+				sch.path2Quota += 1
+				return s.paths[pathIdList[1]]
+			} else {
+				return nil
+			}
+		}
 	}
-	sch.path2Quota += 1
-	return s.paths[pathIdList[1]]
+
+	if s.paths[pathIdList[1]].SendingAllowed() {
+		sch.path2Quota += 1
+		return s.paths[pathIdList[1]]
+	} else {
+		if s.paths[pathIdList[0]].SendingAllowed() {
+			sch.path1Quota += 1
+			return s.paths[pathIdList[0]]
+		} else {
+			return nil
+		}
+	}
 }
 
 func (sch *scheduler) selectFirstPath(s *session, hasRetransmission bool, hasStreamRetransmission bool, fromPth *path) *path {
