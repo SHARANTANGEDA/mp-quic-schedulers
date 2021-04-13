@@ -137,12 +137,12 @@ type Config struct {
 	ModelOutputDir     string
 
 	// Bandwidths, Latency & Packet Losses for both Paths
-	Bandwidth1  float32
-	Bandwidth2  float32
-	Latency1    float32
-	Latency2    float32
-	PacketLoss1 float32
-	PacketLoss2 float32
+	Bandwidth1  float32 // Mbps
+	Bandwidth2  float32 // Mbps
+	Latency1    float32 // Milliseconds
+	Latency2    float32 // Milliseconds
+	PacketLoss1 float32 // Percentage = ex: 1%=1
+	PacketLoss2 float32 // Percentage
 
 	// Temporary for testing
 	SplitRatio float32
