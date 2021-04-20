@@ -134,7 +134,7 @@ type Config struct {
 
 	// Neural Network Specific Config
 	OnlineTrainingFile string
-	ModelOutputDir     string
+	modelOutputDir     string
 
 	// Bandwidths, Latency & Packet Losses for both Paths
 	Bandwidth1  float32 // Mbps

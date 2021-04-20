@@ -209,17 +209,20 @@ func (s *session) setup(
 		s.config.IdleTimeout,
 	)
 
+	splitRatio := s.scheduler.getSplitRatioFromModel(s.config.Bandwidth1, s.config.Latency1, s.config.PacketLoss1,
+		s.config.Bandwidth2, s.config.Latency2, s.config.PacketLoss2, s.config.modelOutputDir)
+
+	fmt.Println("Split Ratio Predicted:", splitRatio)
 	s.scheduler = &scheduler{
 		SchedulerName:      s.config.Scheduler,
 		Training:           s.config.Training,
 		AllowedCongestion:  s.config.AllowedCongestion,
 		DumpExp:            s.config.DumpExperiences,
 		OnlineTrainingFile: s.config.OnlineTrainingFile,
-		ModelOutputDir:     s.config.ModelOutputDir,
-		SplitRatio:         s.config.SplitRatio,
+		ModelOutputDir:     s.config.modelOutputDir,
+		SplitRatio:         splitRatio,
 	}
-	//s.scheduler.getSplitRatioFromModel(s.config.Bandwidth1, s.config.Latency1, s.config.PacketLoss1,
-	//	s.config.Bandwidth2, s.config.Latency2, s.config.PacketLoss2, s.config.ModelOutputDir),
+
 	s.scheduler.setup()
 
 	if pconnMgr == nil && conn != nil {

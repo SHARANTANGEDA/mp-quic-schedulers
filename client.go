@@ -204,11 +204,6 @@ func populateClientConfig(config *Config) *Config {
 		fmt.Println("Default training Dir Path:")
 	}
 
-	if config.ModelOutputDir == "" {
-		os.MkdirAll(filepath.Join(projectHomeDir, constants.DEFAULT_MODEL_OUTPUT_DIR), os.ModePerm)
-		config.ModelOutputDir = filepath.Join(projectHomeDir, constants.DEFAULT_MODEL_OUTPUT_DIR)
-	}
-
 	if config.Scheduler == constants.SCHEDULER_OPTIMUM_SPLIT && (config.Bandwidth1 == 0 || config.Bandwidth2 == 0) {
 		panic("Network Parameters are not provided or Bandwidth Values were set to 0")
 	}
@@ -232,7 +227,7 @@ func populateClientConfig(config *Config) *Config {
 		AllowedCongestion:                     config.AllowedCongestion,
 		DumpExperiences:                       config.DumpExperiences,
 		OnlineTrainingFile:                    config.OnlineTrainingFile,
-		ModelOutputDir:                        config.ModelOutputDir,
+		modelOutputDir:                        filepath.Join(projectHomeDir, constants.DEFAULT_MODEL_OUTPUT_DIR),
 		Bandwidth1:                            config.Bandwidth1,
 		Bandwidth2:                            config.Bandwidth2,
 		Latency1:                              config.Latency1,

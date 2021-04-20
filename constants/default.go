@@ -10,13 +10,12 @@ const (
 	SCHEDULER_BLEST         = "blest"
 	SCHEDULER_DQNA          = "dqnAgent"
 	SCHEDULER_FIRST_PATH    = "first_path"
-	SCHEDULER_NEURAL_NET    = "neural_net"
 	SCHEDULER_OPTIMUM_SPLIT = "optimum_split"
 
 	// Directory Names
 	DEFAULT_TRAINING_DIR        = "online_training"
 	DEFAULT_CLIENT_TRAINING_DIR = "client_online_training"
-	DEFAULT_MODEL_OUTPUT_DIR    = "model_output"
+	DEFAULT_MODEL_OUTPUT_DIR    = "optimal_split_model"
 
 	// File names
 	TRAINING_FILE_NAME = "train.txt"
