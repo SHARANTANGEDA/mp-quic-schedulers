@@ -161,8 +161,8 @@ func (sch *scheduler) getSplitRatioFromModel(bandwidth1 float32, latency1 float3
 	savedModel := tg.LoadModel(filepath.Join(modelOutputDir), []string{"serve"}, nil)
 
 	//Features
-	input, _ := tf.NewTensor([1][6]float32{{bandwidth1, bandwidth2, latency1, latency2, packetLossPercent1,
-		packetLossPercent2}})
+	input, _ := tf.NewTensor([1][6][1]float32{{{bandwidth1}, {bandwidth2}, {latency1}, {latency2}, {packetLossPercent1},
+		{packetLossPercent2}}})
 
 	result := savedModel.Exec([]tf.Output{
 		savedModel.Op("StatefulPartitionedCall", 0),
