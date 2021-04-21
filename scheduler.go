@@ -1318,7 +1318,11 @@ func (sch *scheduler) selectPathOptimum(s *session, hasRetransmission bool, hasS
 		fmt.Printf("Path Id: %d, Local Addr: %s, Remote Addr: %s || ", pathId, path.conn.LocalAddr(),
 			path.conn.RemoteAddr())
 	}
+	sort.Slice(pathIdList, func(i, j int) bool {
+		return int(pathIdList[i]) < int(pathIdList[j])
+	})
 	fmt.Println(pathIdList)
+
 	if pathIdList == nil || len(pathIdList) != 2 {
 		return sch.selectBLEST(s, hasRetransmission, hasStreamRetransmission, fromPth)
 	}
