@@ -1310,11 +1310,15 @@ func (sch *scheduler) selectPathOptimum(s *session, hasRetransmission bool, hasS
 		return sch.selectBLEST(s, hasRetransmission, hasStreamRetransmission, fromPth)
 	}
 	var pathIdList []protocol.PathID
-	for pathId, _ := range s.paths {
+	for pathId, path := range s.paths {
 		if pathId != protocol.InitialPathID {
 			pathIdList = append(pathIdList, pathId)
 		}
+		// Log Path Id w/ Interface Name
+		fmt.Printf("Path Id: %d, Local Addr: %s, Remote Addr: %s || ", pathId, path.conn.LocalAddr(),
+			path.conn.RemoteAddr())
 	}
+	fmt.Println(pathIdList)
 	if pathIdList == nil || len(pathIdList) != 2 {
 		return sch.selectBLEST(s, hasRetransmission, hasStreamRetransmission, fromPth)
 	}
