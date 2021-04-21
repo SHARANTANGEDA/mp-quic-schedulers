@@ -209,10 +209,15 @@ func (s *session) setup(
 		s.config.IdleTimeout,
 	)
 
-	splitRatio := s.scheduler.getSplitRatioFromModel(s.config.Bandwidth1, s.config.Latency1, s.config.PacketLoss1,
-		s.config.Bandwidth2, s.config.Latency2, s.config.PacketLoss2, s.config.modelOutputDir)
+	splitRatio := s.config.SplitRatio
+	if splitRatio == 0.0 {
+		splitRatio = s.scheduler.getSplitRatioFromModel(s.config.Bandwidth1, s.config.Latency1, s.config.PacketLoss1,
+			s.config.Bandwidth2, s.config.Latency2, s.config.PacketLoss2, s.config.modelOutputDir)
+		fmt.Println("Split Ratio Predicted:", splitRatio)
+	} else {
+		fmt.Println("Split Ratio Used:", splitRatio)
+	}
 
-	fmt.Println("Split Ratio Predicted:", splitRatio)
 	s.scheduler = &scheduler{
 		SchedulerName:      s.config.Scheduler,
 		Training:           s.config.Training,
