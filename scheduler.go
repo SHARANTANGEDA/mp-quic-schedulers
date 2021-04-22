@@ -1332,12 +1332,7 @@ func (sch *scheduler) selectPathOptimum(s *session, hasRetransmission bool, hasS
 			sch.path2Quota += 1
 			return s.paths[pathIdList[1]]
 		} else {
-			if s.paths[pathIdList[0]].SendingAllowed() {
-				sch.path1Quota += 1
-				return s.paths[pathIdList[0]]
-			} else {
-				return nil
-			}
+			return nil
 		}
 	}
 
@@ -1348,24 +1343,14 @@ func (sch *scheduler) selectPathOptimum(s *session, hasRetransmission bool, hasS
 				sch.path1Quota += 1
 				return s.paths[pathIdList[0]]
 			} else {
-				if s.paths[pathIdList[1]].SendingAllowed() {
-					sch.path2Quota += 1
-					return s.paths[pathIdList[1]]
-				} else {
-					return nil
-				}
+				return nil
 			}
 		} else {
 			if s.paths[pathIdList[1]].SendingAllowed() {
 				sch.path2Quota += 1
 				return s.paths[pathIdList[1]]
 			} else {
-				if s.paths[pathIdList[0]].SendingAllowed() {
-					sch.path1Quota += 1
-					return s.paths[pathIdList[0]]
-				} else {
-					return nil
-				}
+				return nil
 			}
 		}
 	}
@@ -1374,12 +1359,7 @@ func (sch *scheduler) selectPathOptimum(s *session, hasRetransmission bool, hasS
 			sch.path2Quota += 1
 			return s.paths[pathIdList[1]]
 		} else {
-			if s.paths[pathIdList[0]].SendingAllowed() {
-				sch.path1Quota += 1
-				return s.paths[pathIdList[0]]
-			} else {
-				return nil
-			}
+			return nil
 		}
 	}
 
@@ -1388,12 +1368,7 @@ func (sch *scheduler) selectPathOptimum(s *session, hasRetransmission bool, hasS
 			sch.path1Quota += 1
 			return s.paths[pathIdList[0]]
 		} else {
-			if s.paths[pathIdList[1]].SendingAllowed() {
-				sch.path2Quota += 1
-				return s.paths[pathIdList[1]]
-			} else {
-				return nil
-			}
+			return nil
 		}
 	}
 
@@ -1401,12 +1376,7 @@ func (sch *scheduler) selectPathOptimum(s *session, hasRetransmission bool, hasS
 		sch.path2Quota += 1
 		return s.paths[pathIdList[1]]
 	} else {
-		if s.paths[pathIdList[0]].SendingAllowed() {
-			sch.path1Quota += 1
-			return s.paths[pathIdList[0]]
-		} else {
-			return nil
-		}
+		return nil
 	}
 }
 
